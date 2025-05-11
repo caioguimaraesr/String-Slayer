@@ -17,6 +17,15 @@
 #define WALL_WIDTH 80
 #define WALL_GAP 200
 #define MAX_WALLS 5
+#define MAX_BULLETS 50
+
+typedef struct Bullet {
+    Vector2 position;
+    bool active;
+} Bullet;
+
+Bullet bullets[MAX_BULLETS];
+float bulletSpeed = 500.0f;
 
 Rectangle avoidPlayer;
 float avoidVelocity = 0;
@@ -65,6 +74,8 @@ bool gameEnded = false;
 GameState currentState = MENU;
 BallPositionNode *history = NULL;
 int historyCount = 0;
+int asteroidsDestroyed = 0;
+int asteroidsToActivate = 5;
 
 // === FUNÇÕES DE RASTRO ===
 void AppendBallPosition(BallPositionNode **head, Vector2 pos, int *count) {
@@ -324,12 +335,17 @@ int main(void) {
 
             if (!astroInitialized) {
                 player = (Rectangle){ SCREEN_WIDTH/2.0f - 20, SCREEN_HEIGHT - 60, 40, 40 };
-                playerSpeed = 8.0f;
+                playerSpeed = 10.0f;
                 for (int i = 0; i < MAX_ASTEROIDS; i++) {
                     asteroids[i].position = (Vector2){ rand() % SCREEN_WIDTH, (float)(-(rand() % 600)) };
                     asteroids[i].speed = 10 + rand() % 6; // Velocidade dos asteroides
                     asteroids[i].active = true;
                 }
+
+                for (int i = 0; i < MAX_BULLETS; i++) {
+                    bullets[i].active = false;
+                }
+
                 gameOver = false;
                 survivalTime = 0.0f;
                 hitSound = LoadSound("assets/hit.wav");
@@ -364,6 +380,19 @@ int main(void) {
                 if (IsKeyDown(KEY_UP) && player.y > 0) player.y -= playerSpeed;
                 if (IsKeyDown(KEY_DOWN) && player.y + player.height < SCREEN_HEIGHT) player.y += playerSpeed;
 
+                if (IsKeyPressed(KEY_SPACE)) {
+                    for (int i = 0; i < MAX_BULLETS; i++) {
+                        if (!bullets[i].active) {
+                            bullets[i].active = true;
+                            bullets[i].position = (Vector2){
+                                player.x + player.width / 2,
+                                player.y
+                            };
+                            break;
+                        }
+                    }
+                }
+
                 for (int i = 0; i < MAX_ASTEROIDS; i++) {
                     if (asteroids[i].active) {
                         asteroids[i].position.y += asteroids[i].speed;
@@ -382,8 +411,29 @@ int main(void) {
                         }
                     }
                 }
-            }
 
+                for (int i = 0; i < MAX_BULLETS; i++) {
+                    if (bullets[i].active) {
+                        bullets[i].position.y -= bulletSpeed * GetFrameTime();
+
+                        if (bullets[i].position.y < 0) {
+                            bullets[i].active = false;
+                        }
+
+                        for (int j = 0; j < MAX_ASTEROIDS; j++) {
+                            if (asteroids[j].active) {
+                                Rectangle asteroidRect = { asteroids[j].position.x, asteroids[j].position.y, 30, 30 };
+                                if (CheckCollisionCircleRec(bullets[i].position, 5, asteroidRect)) {
+                                    asteroids[j].active = false;
+                                    bullets[i].active = false;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+                
             DrawTexturePro(
                 shipTexture,
                 (Rectangle){ 0, 0, (float)shipTexture.width, (float)shipTexture.height },
@@ -392,6 +442,12 @@ int main(void) {
                 0.0f,
                 WHITE
             );
+
+            for (int i = 0; i < MAX_BULLETS; i++) {
+                if (bullets[i].active) {
+                    DrawCircleV(bullets[i].position, 5, YELLOW);
+                }
+            }
 
             for (int i = 0; i < MAX_ASTEROIDS; i++) {
                 if (asteroids[i].active)
