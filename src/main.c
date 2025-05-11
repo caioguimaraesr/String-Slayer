@@ -132,15 +132,19 @@ int main(void) {
     Texture2D birdTexture = LoadTexture("assets/images/Flávio Caça-Rato.png");
     Texture2D background = LoadTexture("assets/images/Fundo Avoid the Walls.png");
     Texture2D pipeTexture = LoadTexture("assets/images/pipe.png");
-    InitAudioDevice(); 
+    InitAudioDevice();
     srand(time(NULL));
 
     Music music = LoadMusicStream("assets/music/musica-errada.ogg");
+    Music astroMusic = LoadMusicStream("assets/music/astro.ogg");
+
     PlayMusicStream(music);
     SetMusicVolume(music, 1.0f);
-    
+    PlayMusicStream(astroMusic);
+
     SetTargetFPS(60);
     
+    bool astroMusicPlaying = false;
     const char *menuItems[] = { "Jogar Pong", "Astro Dodge", "Avoid the Walls", "Sair" };
     int selectedOption = 0;
     int menuItemsCount = sizeof(menuItems) / sizeof(menuItems[0]);
@@ -154,12 +158,22 @@ int main(void) {
     int score1 = 0, score2 = 0;
     
     while (!WindowShouldClose()) {
+        // Atualizar a música apropriada
         if (currentState == MENU) {
-            if (!IsMusicStreamPlaying(music)) PlayMusicStream(music);   
-        } else {
-            if (IsMusicStreamPlaying(music)) PauseMusicStream(music);
-        }
+            UpdateMusicStream(music);
 
+            if (!IsMusicStreamPlaying(music)) PlayMusicStream(music);
+            astroMusicPlaying = false;
+        } 
+        else if (currentState == ASTRO_DODGE) {
+            UpdateMusicStream(astroMusic);
+
+            if (!astroMusicPlaying) {
+                StopMusicStream(music); // parar música do menu se estiver tocando
+                PlayMusicStream(astroMusic);
+                astroMusicPlaying = true;
+            }
+        }
         BeginDrawing();
         UpdateMusicStream(music);
 
@@ -465,6 +479,18 @@ int main(void) {
                     currentState = MENU;
                 }
             }
+
+            if (IsKeyPressed(KEY_R)) {
+                astroInitialized = false;
+                UnloadSound(hitSound);
+            }
+
+            if (IsKeyPressed(KEY_M)) {
+                astroInitialized = false;
+                UnloadSound(hitSound);
+                currentState = MENU;
+            }
+            
         } 
         else if (currentState == AVOID_WALLS) {
             BeginDrawing();
@@ -535,11 +561,15 @@ int main(void) {
         EndDrawing();
     }
 
+    // Images
     UnloadTexture(pipeTexture);
     UnloadTexture(background);
     UnloadTexture(birdTexture);
     UnloadTexture(asteroidTexture);
     UnloadTexture(shipTexture);
+
+    // Music
+    UnloadMusicStream(astroMusic);
     UnloadMusicStream(music);
     CloseAudioDevice();
     FreeBallHistory(history);
