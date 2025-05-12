@@ -500,10 +500,20 @@ int main(void) {
             if (!avoidGameOver) {
                 if (!avoidStarted) {
                     avoidCountdown -= GetFrameTime();
-                    DrawText(TextFormat("Começando em %.0f...", avoidCountdown), SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT/2 - 20, 30, WHITE);
+
+                    int countDisplay = (int)avoidCountdown + 1;
+                    if (countDisplay > 0) {
+                        DrawText(TextFormat("%d", countDisplay), SCREEN_WIDTH/2 - 20, SCREEN_HEIGHT/2 - 40, 80, WHITE);
+                    } else {
+                        DrawText("Vai!", SCREEN_WIDTH/2 - 40, SCREEN_HEIGHT/2 - 40, 80, WHITE);
+                    }
+
                     if (avoidCountdown <= 0) {
                         avoidStarted = true;
                     }
+
+                    EndDrawing();
+                    continue;
                 } else {
                     avoidTime += GetFrameTime();
 
