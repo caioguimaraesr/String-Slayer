@@ -5,7 +5,7 @@
 <br> <p align="center"> <a href="#"> <img src="https://img.shields.io/badge/C-00599C?style=for-the-badge&logo=c&logoColor=white" /> </a> <a href="https://www.raylib.com/"> <img src="https://img.shields.io/badge/Raylib-000000?style=for-the-badge&logoColor=white" /> </a> </p>
 <br>
 <h1> <strong> 🎸 Descrição </strong> </h1> 
-<h4> String Slayer é uma coletânea dinâmica de minijogos desafiadores, onde reflexos rápidos e precisão são a chave para vencer. Com opções como Avoid the Wall, Pong e Astro Dodge, o jogo oferece variedade e diversão contínua, ideal para jogadores que buscam testar suas habilidades em diferentes estilos de gameplay, tudo em um só lugar.</h4>
+<h4>String Slayer é um projeto de arcade digital em desenvolvimento, composto por uma coletânea de minijogos com diferentes estilos e desafios. A proposta é oferecer uma experiência dinâmica e acessível, onde cada jogo testa habilidades distintas do jogador, como reflexos, precisão e estratégia. Ideal para quem busca entretenimento variado em uma única plataforma.</h4>
 
 <h1> <strong> 👥 Equipe </strong> </h1> 
 <p align="center"> 
