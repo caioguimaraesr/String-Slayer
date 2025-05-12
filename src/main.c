@@ -9,7 +9,7 @@
 #define PADDLE_HEIGHT 100
 #define PADDLE_SPEED 14
 #define BALL_RADIUS 8
-#define BALL_SPEED 26
+#define BALL_SPEED 10
 #define MAX_HISTORY 100
 #define ROWS 15
 #define COLS 20
@@ -352,7 +352,7 @@ int main(void) {
                 playerSpeed = 10.0f;
                 for (int i = 0; i < MAX_ASTEROIDS; i++) {
                     asteroids[i].position = (Vector2){ rand() % SCREEN_WIDTH, (float)(-(rand() % 600)) };
-                    asteroids[i].speed = 10 + rand() % 6; // Velocidade dos asteroides
+                    asteroids[i].speed = 5 + rand() % 2; // Velocidade dos asteroides
                     asteroids[i].active = true;
                 }
 
