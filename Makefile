@@ -1,25 +1,36 @@
-CC = gcc
-CFLAGS = -std=c99 -Wall -O2
-LIBS = -lraylib -lm -lpthread -ldl -lX11 -lGL -lm
+# Diretórios
+SRC_DIR := src
+INC_DIR := include
+BUILD_DIR := build
 
-SRC_DIR = src
-BUILD_DIR = build
-SRC_FILES = $(SRC_DIR)/main.c
-OUT_FILE = $(BUILD_DIR)/stringslayer
+# Arquivos-fonte e objeto
+SRCS := $(wildcard $(SRC_DIR)/*.c)
+OBJS := $(SRCS:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
 
-# Criação do diretório de build
-$(shell mkdir -p $(BUILD_DIR))
+# Nome do executável
+TARGET := $(BUILD_DIR)/stringslayer-games
+
+# Compilador e flags
+CC := gcc
+CFLAGS = -I. -Iinclude -Isrc -Wall -Wextra -std=c99
+LDFLAGS := -lraylib -lm -ldl -lpthread -lGL  # Ajuste se necessário
+
+# Regra padrão
+all: $(TARGET)
+
+# Linkagem
+$(TARGET): $(OBJS)
+	$(CC) -o $@ $^ $(LDFLAGS)
 
 # Compilação
-$(OUT_FILE): $(SRC_FILES)
-	$(CC) $(CFLAGS) -o $(OUT_FILE) $(SRC_FILES) $(LIBS)
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
+	@mkdir -p $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
 
-# Limpeza de arquivos gerados
+# Limpar arquivos
 clean:
-	rm -rf $(BUILD_DIR)
+	rm -rf $(BUILD_DIR)/*.o $(TARGET)
 
-# Executa o jogo após compilar
-run: $(OUT_FILE)
-	./$(OUT_FILE)
-
-.PHONY: clean run
+# Executar o jogo
+run: all
+	./$(TARGET)
