@@ -4,7 +4,7 @@
 
 // === DEFINIÇÕES ===
 #define SCREEN_WIDTH 800
-#define SCREEN_HEIGHT 450
+#define SCREEN_HEIGHT 500
 #define PADDLE_WIDTH 10
 #define PADDLE_HEIGHT 100
 #define PADDLE_SPEED 14
@@ -55,6 +55,7 @@ typedef enum GameState {
     GAME,
     ASTRO_DODGE,
     AVOID_WALLS,
+    COMMANDS,
 } GameState;
 
 // === ESTRUTURAS ===
@@ -160,7 +161,7 @@ int main(void) {
     SetTargetFPS(60);
     
     bool astroMusicPlaying = false;
-    const char *menuItems[] = { "Jogar Pong", "Astro Dodge", "Avoid the Walls", "Sair" };
+    const char *menuItems[] = { "Jogar Pong", "Astro Dodge", "Avoid the Walls", "Comandos", "Sair" };
     int selectedOption = 0;
     int menuItemsCount = sizeof(menuItems) / sizeof(menuItems[0]);
     bool pongStarted = false;
@@ -235,6 +236,8 @@ int main(void) {
                     ResetAvoidGame();
                     currentState = AVOID_WALLS;
                 }else if (selectedOption == 3){
+                    currentState = COMMANDS;
+                }else if (selectedOption == 4){
                     break;
                 }
             }
@@ -598,7 +601,39 @@ int main(void) {
                 }
             }
         }
-
+        else if (currentState == COMMANDS) {
+            ClearBackground(BLACK);
+        
+            int y = 50;
+            int spacing = 30;
+            int sectionSpacing = 50;
+            DrawText("Comandos do Jogo:", SCREEN_WIDTH/2 - MeasureText("Comandos do Jogo:", 30)/2, y, 30, YELLOW);
+            y += sectionSpacing;
+            // PONG
+            DrawText("PONG", SCREEN_WIDTH/2 - MeasureText("PONG", 25)/2, y, 25, WHITE);
+            y += spacing;
+            DrawText("Jogador 1: W (Cima), S (Baixo)", SCREEN_WIDTH/2 - MeasureText("Jogador 1: W (Cima), S (Baixo)", 20)/2, y, 20, LIGHTGRAY);
+            y += spacing;
+            DrawText("Jogador 2: Setas Cima, Baixo", SCREEN_WIDTH/2 - MeasureText("Jogador 2: Setas Cima, Baixo", 20)/2, y, 20, LIGHTGRAY);
+            y += sectionSpacing;
+            // ASTRO DODGE
+            DrawText("ASTRO DODGE", SCREEN_WIDTH/2 - MeasureText("ASTRO DODGE", 25)/2, y, 25, WHITE);
+            y += spacing;
+            DrawText("WASD para mover, Espaço para atirar", SCREEN_WIDTH/2 - MeasureText("WASD para mover, Espaço para atirar", 20)/2, y, 20, LIGHTGRAY);
+            y += sectionSpacing;
+            // AVOID THE WALLS
+            DrawText("AVOID THE WALLS", SCREEN_WIDTH/2 - MeasureText("AVOID THE WALLS", 25)/2, y, 25, WHITE);
+            y += spacing;
+            DrawText("Espaço para pular", SCREEN_WIDTH/2 - MeasureText("Espaço para pular", 20)/2, y, 20, LIGHTGRAY);
+            y += sectionSpacing;
+            DrawText("Pressione ESC para voltar", SCREEN_WIDTH/2 - MeasureText("Pressione ESC para voltar", 20)/2, SCREEN_HEIGHT - 50, 20, GRAY);
+        
+            if (IsKeyPressed(KEY_ESCAPE)) {
+                currentState = MENU;
+            }
+        }
+        
+        
         EndDrawing();
     }
 
