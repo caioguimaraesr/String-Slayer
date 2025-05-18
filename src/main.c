@@ -52,7 +52,7 @@ float pointDelay = 0.0f;
 // === ENUM ESTADO DO JOGO ===
 typedef enum GameState {
     MENU,
-    GAME,
+    PONG,
     ASTRO_DODGE,
     AVOID_WALLS,
     COMMANDS,
@@ -79,6 +79,8 @@ BallPositionNode *history = NULL;
 int historyCount = 0;
 int asteroidsDestroyed = 0;
 int asteroidsToActivate = 5;
+static bool rebound = false;
+static bool barHit = false;
 
 // === FUNÇÕES DE RASTRO ===
 void AppendBallPosition(BallPositionNode **head, Vector2 pos, int *count) {
@@ -118,7 +120,7 @@ void ResetBallHistory() {
     historyCount = 0;
 }
 void ResetAvoidGame() {
-    avoidPlayer = (Rectangle){ 100, SCREEN_HEIGHT/2 - 25, 40, 40 };
+    avoidPlayer = (Rectangle){ 100, SCREEN_HEIGHT/2 - 25, 40, 40};
     avoidVelocity = 0;
     avoidGameOver = false;
     avoidStarted = false;
@@ -151,12 +153,18 @@ int main(void) {
     InitAudioDevice();
     srand(time(NULL));
 
-    Music music = LoadMusicStream("assets/music/musica-errada.ogg");
+    Music music = LoadMusicStream("assets/music/musica-errada.wav");
     Music astroMusic = LoadMusicStream("assets/music/astro.ogg");
+    Sound pongBar = LoadSound("assets/music/Barra.wav");
+    Sound pongPoint = LoadSound("assets/music/pontoPong.wav");
+    Sound pongRebound = LoadSound("assets/music/Rebound.wav");
 
-    PlayMusicStream(music);
-    SetMusicVolume(music, 0.4f);
+
     PlayMusicStream(astroMusic);
+    SetMusicVolume(astroMusic,0.3f);
+    SetSoundVolume(pongPoint,0.05f);
+    SetSoundVolume(pongBar,0.05f);
+    SetSoundVolume(pongRebound,0.05f);
 
     SetTargetFPS(60);
     
@@ -228,7 +236,7 @@ int main(void) {
                     history = NULL;
                     historyCount = 0;
 
-                    currentState = GAME;
+                    currentState = PONG;
 
                 } else if (selectedOption == 1) {
                     currentState = ASTRO_DODGE;
@@ -256,7 +264,7 @@ int main(void) {
             }
         }
         
-        else if (currentState == GAME) {
+        else if (currentState == PONG) {
             if (pointScored) {
                 pointDelay -= GetFrameTime();
                 if (pointDelay <= 0.0f) {
@@ -303,20 +311,41 @@ int main(void) {
         
                 AppendBallPosition(&history, ballPosition, &historyCount);
         
-                if (ballPosition.y <= BALL_RADIUS || ballPosition.y >= SCREEN_HEIGHT - BALL_RADIUS)
-                    ballSpeed.y *= -1;
-        
-                if (CheckCollisionCircleRec(ballPosition, BALL_RADIUS, player1) && ballSpeed.x < 0)
-                    ballSpeed.x *= -1;
-                if (CheckCollisionCircleRec(ballPosition, BALL_RADIUS, player2) && ballSpeed.x > 0)
-                    ballSpeed.x *= -1;
-        
+                if (ballPosition.y <= BALL_RADIUS || ballPosition.y >= SCREEN_HEIGHT - BALL_RADIUS) {
+                    if(!rebound) {
+                        ballSpeed.y *= -1;
+                        PlaySound(pongRebound);
+                        rebound = true;
+                    }
+                }else {
+                    rebound = false;
+                }
+                if (CheckCollisionCircleRec(ballPosition, BALL_RADIUS, player1) && ballSpeed.x < 0) {
+                    if(!barHit) {
+                        ballSpeed.x *= -1;
+                        PlaySound(pongBar);
+                        barHit = true;
+                        }
+                }else{
+                    barHit = false;
+                    } 
+                if (CheckCollisionCircleRec(ballPosition, BALL_RADIUS, player2) && ballSpeed.x > 0) {
+                    if(!barHit) {
+                        ballSpeed.x *= -1;
+                        PlaySound(pongBar);
+                        barHit = true;
+                        }
+                }else {
+                    barHit = false;
+                } 
                 if (ballPosition.x < 0 || ballPosition.x > SCREEN_WIDTH) {
                     if (ballPosition.x < 0) {
                         score2++;
+                        PlaySound(pongPoint);
                         ballSpeed = (Vector2){-BALL_SPEED, BALL_SPEED}; // comeca a bola com quem tomou ponto
                     }else {
                         score1++;
+                        PlaySound(pongPoint);
                         ballSpeed = (Vector2){BALL_SPEED, BALL_SPEED}; // comeca a bola com quem tomou ponto
                         }
                     ballPosition = (Vector2){SCREEN_WIDTH/2.0f, SCREEN_HEIGHT/2.0f};
@@ -402,7 +431,7 @@ int main(void) {
                 gameStarted = false;
             }
 
-            // TIMER DE INÍCIO ANTES DO GAME COMEÇAR
+            // TIMER DE INÍCIO ANTES DO ASTRO COMEÇAR
             if (!gameStarted) {
                 startCountdown -= GetFrameTime();
 
@@ -626,9 +655,9 @@ int main(void) {
             y += spacing;
             DrawText("Espaço para pular", SCREEN_WIDTH/2 - MeasureText("Espaço para pular", 20)/2, y, 20, LIGHTGRAY);
             y += sectionSpacing;
-            DrawText("Pressione ESC para voltar", SCREEN_WIDTH/2 - MeasureText("Pressione ESC para voltar", 20)/2, SCREEN_HEIGHT - 50, 20, GRAY);
+            DrawText("Pressione ENTER para voltar", SCREEN_WIDTH/2 - MeasureText("Pressione ENTER para voltar", 20)/2, SCREEN_HEIGHT - 50, 20, GRAY);
         
-            if (IsKeyPressed(KEY_ESCAPE)) {
+            if (IsKeyPressed(KEY_ENTER)) {
                 currentState = MENU;
             }
         }
@@ -647,6 +676,9 @@ int main(void) {
     // Music
     UnloadMusicStream(astroMusic);
     UnloadMusicStream(music);
+    UnloadSound(pongPoint);
+    UnloadSound(pongBar);
+    UnloadSound(pongRebound);
     CloseAudioDevice();
     FreeBallHistory(history);
     CloseWindow();
