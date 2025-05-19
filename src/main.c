@@ -6,15 +6,12 @@
 #include <stdlib.h>
 #include <time.h>
 
-Bullet bullets[MAX_BULLETS];
-float bulletSpeed = 500.0f;
-
-Rectangle avoidPlayer;
+// == AVOID THE WALLS ==
+Rectangle avoidPlayer; 
 float avoidVelocity = 0;
 float avoidGravity = 600;
 float avoidJumpForce = -300;
-
-Wall walls[MAX_WALLS];
+Wall walls[MAX_WALLS]; 
 float wallSpeed = 200;
 int wallSpacing = 300;
 bool avoidGameOver = false;
@@ -22,23 +19,28 @@ float avoidTime = 0.0f;
 float avoidBestTime = 0.0f;
 bool avoidStarted = false;
 float avoidCountdown = 5.0f;
-bool pointScored = false;
+
+// == PONG ==
+bool pointScored = false; 
 float pointDelay = 0.0f;
+static bool rebound = false;
+static bool barHit = false;
+int historyCount = 0;
+BallPositionNode *history = NULL;
+
+// == ASTRO DODGE ==
+int asteroidsDestroyed = 0;
+int asteroidsToActivate = 5;
+Bullet bullets[MAX_BULLETS];
+float bulletSpeed = 500.0f;
 
 // === VARIÁVEIS GLOBAIS ===
 int grid[ROWS][COLS] = {0};
 float gameTime = 120.0f;
 bool gameEnded = false;
 GameState currentState = MENU;
-BallPositionNode *history = NULL;
-int historyCount = 0;
-int asteroidsDestroyed = 0;
-int asteroidsToActivate = 5;
-static bool rebound = false;
-static bool barHit = false;
 
-
-// === FUNÇÕES DE RASTRO ===
+// === FUNÇÕES DO PONG ===
 void AppendBallPosition(BallPositionNode **head, Vector2 pos, int *count) {
     BallPositionNode *newNode = malloc(sizeof(BallPositionNode));
     newNode->position = pos;
@@ -75,6 +77,16 @@ void ResetBallHistory() {
     history = NULL;
     historyCount = 0;
 }
+
+void ResetGrid() {
+    for (int r = 0; r < ROWS; r++) {
+        for (int c = 0; c < COLS; c++) {
+            grid[r][c] = 0;
+        }
+    }
+}
+
+// == FUNÇÕES DO AVOID ==
 void ResetAvoidGame() {
     avoidPlayer = (Rectangle){ 100, SCREEN_HEIGHT/2 - 25, 40, 40};
     avoidVelocity = 0;
@@ -87,14 +99,6 @@ void ResetAvoidGame() {
         walls[i].x = SCREEN_WIDTH + i * wallSpacing;
         walls[i].gapY = 100 + rand() % (SCREEN_HEIGHT - WALL_GAP - 100);
         walls[i].passed = false;
-    }
-}
-
-void ResetGrid() {
-    for (int r = 0; r < ROWS; r++) {
-        for (int c = 0; c < COLS; c++) {
-            grid[r][c] = 0;
-        }
     }
 }
 
