@@ -56,10 +56,10 @@ int main(void) {
     SetTargetFPS(60);
     
     bool astroMusicPlaying = false;
-    const char *menuItems[] = { "PLAY", "COMANDS", "EXIT" };
+    const char *menuItems[] = { "JOGAR", "COMANDOS", "SAIR" };
     int mainMenuItemsCount = sizeof(menuItems) / sizeof(menuItems[0]);
 
-    const char *gameMenuItems[] = { "PONG", "ASTRO DODGE", "AVOID THE WALLS", "BACK" };
+    const char *gameMenuItems[] = { "PONG", "ASTRO DODGE", "AVOID THE WALLS", "VOLTAR" };
     int gameMenuItemsCount = sizeof(gameMenuItems) / sizeof(gameMenuItems[0]);
 
     int selectedOption = 0;
@@ -118,24 +118,20 @@ int main(void) {
                 }
             }
 
-            // Botão destacado: "Play"
             int playFontSize = 60;
             const char* playText = menuItems[0];
             int playTextWidth = MeasureText(playText, playFontSize);
             int playX = SCREEN_WIDTH / 2 - playTextWidth / 2;
-            int playY = 420;  // Mais abaixo que antes
+            int playY = 420;
 
-            // Retângulo de fundo arredondado
             int padding = 30;
             DrawRectangleRounded((Rectangle){
                 playX - padding/2, playY - 10, playTextWidth + padding, playFontSize + 20
             }, 0.4f, 10, Fade(DARKGRAY, 0.5f));
 
-            // Texto
             Color playColor = (selectedOption == 0) ? ORANGE : WHITE;
             DrawText(playText, playX, playY, playFontSize, playColor);
 
-            // Se quiser mostrar os outros itens menores (opcional):
             int fontSize = 25;
             for (int i = 1; i < mainMenuItemsCount; i++) {
                 Color color = (i == selectedOption) ? YELLOW : LIGHTGRAY;
