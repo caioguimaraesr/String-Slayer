@@ -24,8 +24,8 @@ static float wallSpeed = 200;
 static int pipePassed;
 
 void AvoidInit(void) {
-    background = LoadTexture("assets/images/Fundo Avoid the Walls.png");
-    birdTexture = LoadTexture("assets/images/Flávio Caça-Rato.png");
+    background = LoadTexture("assets/images/Fundo-avoid.jpg");
+    birdTexture = LoadTexture("assets/images/Pombo.png");
     pipeTexture = LoadTexture("assets/images/pipe.png");
 
     avoidPlayer = (Rectangle){ 100, SCREEN_HEIGHT/2, 34, 24 };
@@ -93,7 +93,11 @@ void AvoidUpdate(void) {
 }
 
 void AvoidDraw(void) {
-    DrawTexture(background, 0, 0, WHITE);
+    Rectangle source = { 0, 0, (float)background.width, (float)background.height };
+    Rectangle dest = { SCREEN_WIDTH/2 - (background.width / 4.0f), SCREEN_HEIGHT/2 - (background.height / 4.0f), background.width / 2.0f, background.height / 2.0f };
+    Vector2 origin = { 0, 0 };
+
+    DrawTexturePro(background, source, dest, origin, 0.0f, WHITE);
 
     if (!avoidGameOver) {
         if (!avoidStarted) {
@@ -109,7 +113,7 @@ void AvoidDraw(void) {
                 Rectangle bottomWall = { walls[i].x, walls[i].gapY + WALL_GAP, WALL_WIDTH, SCREEN_HEIGHT - (walls[i].gapY + WALL_GAP) };
 
                 DrawTexturePro(pipeTexture,
-                    (Rectangle){0, 0, pipeTexture.width, pipeTexture.height},
+                    (Rectangle){0, 0, pipeTexture.width, -pipeTexture.height},
                     topWall,
                     (Vector2){0, 0},
                     0.0f,
@@ -123,7 +127,7 @@ void AvoidDraw(void) {
                     WHITE);
             }
 
-            DrawTextureEx(birdTexture, (Vector2){avoidPlayer.x, avoidPlayer.y}, 0.0f, 0.5f, WHITE);
+            DrawTextureEx(birdTexture, (Vector2){avoidPlayer.x, avoidPlayer.y}, 0.0f, 0.3f, WHITE);
             DrawText(TextFormat("Pontuação: %d", pipePassed), 20, 20, 20, WHITE);
             DrawText(TextFormat("Melhor: %d", pipePassedRecord), 20, 50, 20, YELLOW);
         }

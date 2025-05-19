@@ -6,7 +6,6 @@
 #include <stdlib.h>
 #include <time.h>
 
-
 // == AVOID THE WALLS ==
 Rectangle avoidPlayer; 
 float avoidVelocity = 0;
@@ -18,7 +17,6 @@ int wallSpacing = 300;
 bool avoidGameOver = false;
 float avoidCountdown = 5.0f;
 bool avoidInitialized = false;
-
 
 // == ASTRO DODGE ==
 int asteroidsDestroyed = 0;
@@ -35,8 +33,10 @@ int main(void) {
     Texture2D asteroidTexture = LoadTexture("assets/images/asteroid.png");
     Texture2D menuBackground = LoadTexture("assets/images/String Slayer - Background.png");
     Texture2D birdTexture = LoadTexture("assets/images/Flávio Caça-Rato.png");
-    Texture2D background = LoadTexture("assets/images/Fundo Avoid the Walls.png");
+    Texture2D background = LoadTexture("assets/images/Fundo-avoid.jpg");
     Texture2D pipeTexture = LoadTexture("assets/images/pipe.png");
+    Texture2D menuGameBackground = LoadTexture("assets/images/Photo.png");
+
     InitAudioDevice();
     srand(time(NULL));
 
@@ -56,10 +56,14 @@ int main(void) {
     SetTargetFPS(60);
     
     bool astroMusicPlaying = false;
-    const char *menuItems[] = { "Jogar Pong", "Astro Dodge", "Avoid the Walls", "Comandos", "Sair" };
-    int selectedOption = 0;
-    int menuItemsCount = sizeof(menuItems) / sizeof(menuItems[0]);
+    const char *menuItems[] = { "PLAY", "COMANDS", "EXIT" };
+    int mainMenuItemsCount = sizeof(menuItems) / sizeof(menuItems[0]);
 
+    const char *gameMenuItems[] = { "PONG", "ASTRO DODGE", "AVOID THE WALLS", "BACK" };
+    int gameMenuItemsCount = sizeof(gameMenuItems) / sizeof(gameMenuItems[0]);
+
+    int selectedOption = 0;
+    
     while (!WindowShouldClose()) {
         // Atualizar a música apropriada
         if (currentState == MENU) {
@@ -72,7 +76,7 @@ int main(void) {
             UpdateMusicStream(astroMusic);
 
             if (!astroMusicPlaying) {
-                StopMusicStream(music); // parar música do menu se estiver tocando
+                StopMusicStream(music);
                 PlayMusicStream(astroMusic);
                 astroMusicPlaying = true;
             }
@@ -90,16 +94,89 @@ int main(void) {
 
         ClearBackground(BLACK);
 
-        if (currentState == MENU) {
-            if (IsKeyPressed(KEY_DOWN)) selectedOption = (selectedOption + 1) % menuItemsCount;
-            if (IsKeyPressed(KEY_UP)) selectedOption = (selectedOption - 1 + menuItemsCount) % menuItemsCount;
+       if (currentState == MENU) {
+            Rectangle source = { 0, 0, (float)menuBackground.width, (float)menuBackground.height };
+            Rectangle dest = { 0, 0, (float)SCREEN_WIDTH, (float)SCREEN_HEIGHT };
+            Vector2 origin = { 0, 0 };
+
+            DrawTexturePro(menuBackground, source, dest, origin, 0.0f, WHITE);
+
+            ClearBackground(BLACK);
+
+            // Navegação
+            if (IsKeyPressed(KEY_DOWN)) selectedOption = (selectedOption + 1) % mainMenuItemsCount;
+            if (IsKeyPressed(KEY_UP)) selectedOption = (selectedOption - 1 + mainMenuItemsCount) % mainMenuItemsCount;
 
             if (IsKeyPressed(KEY_ENTER)) {
                 if (selectedOption == 0) {
+                    currentState = GAMES_MENU;
+                    selectedOption = 0;
+                } else if (selectedOption == 1) {
+                    currentState = COMMANDS;
+                } else if (selectedOption == 2) {
+                    break;
+                }
+            }
 
+            // Botão destacado: "Play"
+            int playFontSize = 60;
+            const char* playText = menuItems[0];
+            int playTextWidth = MeasureText(playText, playFontSize);
+            int playX = SCREEN_WIDTH / 2 - playTextWidth / 2;
+            int playY = 420;  // Mais abaixo que antes
+
+            // Retângulo de fundo arredondado
+            int padding = 30;
+            DrawRectangleRounded((Rectangle){
+                playX - padding/2, playY - 10, playTextWidth + padding, playFontSize + 20
+            }, 0.4f, 10, Fade(DARKGRAY, 0.5f));
+
+            // Texto
+            Color playColor = (selectedOption == 0) ? ORANGE : WHITE;
+            DrawText(playText, playX, playY, playFontSize, playColor);
+
+            // Se quiser mostrar os outros itens menores (opcional):
+            int fontSize = 25;
+            for (int i = 1; i < mainMenuItemsCount; i++) {
+                Color color = (i == selectedOption) ? YELLOW : LIGHTGRAY;
+                int textWidth = MeasureText(menuItems[i], fontSize);
+                int x = SCREEN_WIDTH / 2 - textWidth / 2;
+                int y = 500 + (i - 1) * 35;
+                DrawText(menuItems[i], x, y, fontSize, color);
+            }
+        }
+
+        else if (currentState == GAMES_MENU) {
+            DrawTexture(menuGameBackground, 0, 0, WHITE); 
+
+            const char *title = "START GAME";
+            int titleFontSize = 50;
+            int titleWidth = MeasureText(title, titleFontSize);
+            DrawText(title, SCREEN_WIDTH/2 - titleWidth/2, 100, titleFontSize, YELLOW);
+
+            for (int i = 0; i < gameMenuItemsCount; i++) {
+                bool isSelected = (i == selectedOption);
+                Color color = isSelected ? YELLOW : WHITE;
+                int fontSize = isSelected ? 35 : 30;
+
+                int textWidth = MeasureText(gameMenuItems[i], fontSize);
+                int x = SCREEN_WIDTH / 2 - textWidth / 2;
+                int y = 250 + i * 60;
+
+                if (isSelected) {
+                    DrawRectangle(x - 20, y - 5, textWidth + 40, fontSize + 10, Fade(DARKGRAY, 0.4f));
+                }
+
+                DrawText(gameMenuItems[i], x, y, fontSize, color);
+            }
+
+            if (IsKeyPressed(KEY_DOWN)) selectedOption = (selectedOption + 1) % gameMenuItemsCount;
+            if (IsKeyPressed(KEY_UP)) selectedOption = (selectedOption - 1 + gameMenuItemsCount) % gameMenuItemsCount;
+
+            if (IsKeyPressed(KEY_ENTER)) {
+                if (selectedOption == 0) {
                     pongStarted = false;
                     pongCountdown = 5.0f;
-
                     for (int r = 0; r < ROWS; r++)
                         for (int c = 0; c < COLS; c++)
                             grid[r][c] = 0;
@@ -116,32 +193,18 @@ int main(void) {
                     historyCount = 0;
 
                     currentState = PONG;
-
                 } else if (selectedOption == 1) {
                     currentState = ASTRO_DODGE;
                 } else if (selectedOption == 2) {
                     currentState = AVOID_WALLS;
-                }else if (selectedOption == 3){
-                    currentState = COMMANDS;
-                }else if (selectedOption == 4){
-                    break;
+                } else if (selectedOption == 3) {
+                    currentState = MENU;
+                    selectedOption = 0;
                 }
             }
-
-            for (int i = 0; i < menuItemsCount; i++) {
-                Color color = (i == selectedOption) ? YELLOW : WHITE;
-                const char* text = menuItems[i];
-                int fontSize = 30;
-                int textWidth = MeasureText(text, fontSize);
-                
-                // Ajuste as coordenadas Y e X aqui:
-                int x = SCREEN_WIDTH / 2 - textWidth / 2;
-                int y = 340 + i * 40;  // 200 é o topo inicial, 50 é o espaçamento vertical
-
-                DrawText(text, x, y, fontSize, color);
-            }
         }
-        
+
+        // Inicio do Jogo Pong
         else if (currentState == PONG) {
             HandlePointScored();
             DrawCountdown();
@@ -149,6 +212,7 @@ int main(void) {
             DrawGame();
             HandleGameEnd();
         }
+
         // Inicio do Jogo Astro Dodge
         else if (currentState == ASTRO_DODGE) {
             static bool astroInitialized = false;
@@ -307,6 +371,8 @@ int main(void) {
             }
             
         } 
+
+        // Inicio do Jogo Avoid Walls
         else if (currentState == AVOID_WALLS) {
             if (!avoidInitialized) {
                 AvoidInit();
@@ -363,6 +429,7 @@ int main(void) {
     UnloadTexture(birdTexture);
     UnloadTexture(asteroidTexture);
     UnloadTexture(shipTexture);
+    UnloadTexture(menuGameBackground);
 
     // Music
     UnloadMusicStream(astroMusic);

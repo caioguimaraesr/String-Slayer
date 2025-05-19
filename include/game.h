@@ -10,6 +10,7 @@
 // === ENUM ESTADO DO JOGO ===
 typedef enum GameState {
     MENU,
+    GAMES_MENU,
     PONG,
     ASTRO_DODGE,
     AVOID_WALLS,
