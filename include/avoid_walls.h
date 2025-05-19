@@ -15,4 +15,14 @@ typedef struct {
     bool passed;
 } Wall;
 
+#include "raylib.h"
+
+void AvoidInit(void);
+void AvoidUpdate(void);
+void AvoidDraw(void);
+void AvoidUnload(void);
+bool AvoidIsGameOver(void);
+float AvoidGetBestTime(void);
+
 #endif
+

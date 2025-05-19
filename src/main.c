@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <time.h>
 
+
 // == AVOID THE WALLS ==
 Rectangle avoidPlayer; 
 float avoidVelocity = 0;
@@ -17,9 +18,8 @@ int wallSpacing = 300;
 bool avoidGameOver = false;
 float avoidTime = 0.0f;
 float avoidBestTime = 0.0f;
-bool avoidStarted = false;
 float avoidCountdown = 5.0f;
-
+bool avoidInitialized = false;
 // == PONG ==
 bool pointScored = false; 
 float pointDelay = 0.0f;
@@ -87,20 +87,20 @@ void ResetGrid() {
 }
 
 // == FUNÇÕES DO AVOID ==
-void ResetAvoidGame() {
-    avoidPlayer = (Rectangle){ 100, SCREEN_HEIGHT/2 - 25, 40, 40};
-    avoidVelocity = 0;
-    avoidGameOver = false;
-    avoidStarted = false;
-    avoidCountdown = 5.0f;
-    avoidTime = 0.0f;
+// void ResetAvoidGame() {
+//     avoidPlayer = (Rectangle){ 100, SCREEN_HEIGHT/2 - 25, 40, 40};
+//     avoidVelocity = 0;
+//     avoidGameOver = false;
+//     avoidStarted = false;
+//     avoidCountdown = 5.0f;
+//     avoidTime = 0.0f;
 
-    for (int i = 0; i < MAX_WALLS; i++) {
-        walls[i].x = SCREEN_WIDTH + i * wallSpacing;
-        walls[i].gapY = 100 + rand() % (SCREEN_HEIGHT - WALL_GAP - 100);
-        walls[i].passed = false;
-    }
-}
+//     for (int i = 0; i < MAX_WALLS; i++) {
+//         walls[i].x = SCREEN_WIDTH + i * wallSpacing;
+//         walls[i].gapY = 100 + rand() % (SCREEN_HEIGHT - WALL_GAP - 100);
+//         walls[i].passed = false;
+//     }
+// }
 
 int main(void) {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "String Slayer");
@@ -201,7 +201,6 @@ int main(void) {
                 } else if (selectedOption == 1) {
                     currentState = ASTRO_DODGE;
                 } else if (selectedOption == 2) {
-                    ResetAvoidGame();
                     currentState = AVOID_WALLS;
                 }else if (selectedOption == 3){
                     currentState = COMMANDS;
@@ -516,78 +515,17 @@ int main(void) {
             
         } 
         else if (currentState == AVOID_WALLS) {
-            BeginDrawing();
-            DrawTexture(background, 0, 0, WHITE);
-            ClearBackground(DARKBLUE);
-
-            if (!avoidGameOver) {
-                if (!avoidStarted) {
-                    avoidCountdown -= GetFrameTime();
-
-                    int countDisplay = (int)avoidCountdown + 1;
-                    if (countDisplay > 0) {
-                        DrawText(TextFormat("%d", countDisplay), SCREEN_WIDTH/2 - 20, SCREEN_HEIGHT/2 - 40, 80, WHITE);
-                    } else {
-                        DrawText("Vai!", SCREEN_WIDTH/2 - 40, SCREEN_HEIGHT/2 - 40, 80, WHITE);
-                    }
-
-                    if (avoidCountdown <= 0) {
-                        avoidStarted = true;
-                    }
-
-                    EndDrawing();
-                    continue;
-                } else {
-                    avoidTime += GetFrameTime();
-
-                    if (IsKeyPressed(KEY_SPACE)) avoidVelocity = avoidJumpForce;
-
-                    avoidVelocity += avoidGravity * GetFrameTime();
-                    avoidPlayer.y += avoidVelocity * GetFrameTime();
-
-                    for (int i = 0; i < MAX_WALLS; i++) {
-                        walls[i].x -= wallSpeed * GetFrameTime();
-
-                        if (walls[i].x + WALL_WIDTH < 0) {
-                            walls[i].x = SCREEN_WIDTH + wallSpacing;
-                            walls[i].gapY = 100 + rand() % (SCREEN_HEIGHT - WALL_GAP - 100);
-                            walls[i].passed = false;
-                        }
-
-                        Rectangle topWall = { walls[i].x, 0, WALL_WIDTH, walls[i].gapY };
-                        Rectangle bottomWall = { walls[i].x, walls[i].gapY + WALL_GAP, WALL_WIDTH, SCREEN_HEIGHT - (walls[i].gapY + WALL_GAP) };
-
-                        if (CheckCollisionRecs(avoidPlayer, topWall) || CheckCollisionRecs(avoidPlayer, bottomWall) || avoidPlayer.y < 0 || avoidPlayer.y + avoidPlayer.height > SCREEN_HEIGHT) {
-                            avoidGameOver = true;
-                            if (avoidTime > avoidBestTime) avoidBestTime = avoidTime;
-                        }
-
-                        DrawTexturePro(pipeTexture,
-                            (Rectangle){0, 0, pipeTexture.width, -pipeTexture.height},
-                            topWall, 
-                            (Vector2){0, 0},  
-                            0.0f, 
-                            WHITE);
-
-                        DrawTexturePro(pipeTexture,
-                            (Rectangle){0, 0, pipeTexture.width, pipeTexture.height},
-                            bottomWall,
-                            (Vector2){0, 0},
-                            0.0f,
-                            WHITE);
-                    }
-
-                    float scale = 0.5f; // Aumenta o tamanho para o dobro
-                    DrawTextureEx(birdTexture, (Vector2){avoidPlayer.x, avoidPlayer.y}, 0.0f, scale, WHITE);
-                    DrawText(TextFormat("Tempo: %.2f", avoidTime), 20, 20, 20, WHITE);
-                    DrawText(TextFormat("Melhor: %.2f", avoidBestTime), 20, 50, 20, YELLOW);
-                }
-            } else {
-                DrawText("Game Over!", SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT/2 - 30, 40, RED);
-                DrawText("Pressione ENTER para voltar ao menu", SCREEN_WIDTH/2 - 180, SCREEN_HEIGHT/2 + 10, 20, LIGHTGRAY);
-                if (IsKeyPressed(KEY_ENTER)) {
-                    currentState = MENU;
-                }
+            if (!avoidInitialized) {
+                AvoidInit();
+                avoidInitialized = true;
+            }
+            AvoidUpdate();
+            AvoidDraw();
+        
+            if (AvoidIsGameOver() && IsKeyPressed(KEY_ENTER)) {
+                AvoidUnload();
+                avoidInitialized = false;
+                currentState = MENU;
             }
         }
         else if (currentState == COMMANDS) {

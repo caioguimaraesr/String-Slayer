@@ -8,7 +8,7 @@ BUILD_DIR = build
 INCLUDE_DIR = include
 
 # Arquivos
-SRC_FILES = $(SRC_DIR)/main.c
+SRC_FILES = $(wildcard $(SRC_DIR)/*.c)
 HEADER_FILES = $(wildcard $(INCLUDE_DIR)/*.h)
 OUT_FILE = $(BUILD_DIR)/stringslayer
 
