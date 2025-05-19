@@ -5,7 +5,7 @@
 
 // === DEFINIÇÕES GLOBAIS ===
 #define SCREEN_WIDTH 800
-#define SCREEN_HEIGHT 500
+#define SCREEN_HEIGHT 600
 
 // === ENUM ESTADO DO JOGO ===
 typedef enum GameState {
@@ -16,4 +16,5 @@ typedef enum GameState {
     COMMANDS,
 } GameState;
 
+extern GameState currentState;
 #endif

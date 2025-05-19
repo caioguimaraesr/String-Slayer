@@ -16,17 +16,9 @@ Wall walls[MAX_WALLS];
 float wallSpeed = 200;
 int wallSpacing = 300;
 bool avoidGameOver = false;
-float avoidTime = 0.0f;
-float avoidBestTime = 0.0f;
 float avoidCountdown = 5.0f;
 bool avoidInitialized = false;
-// == PONG ==
-bool pointScored = false; 
-float pointDelay = 0.0f;
-static bool rebound = false;
-static bool barHit = false;
-int historyCount = 0;
-BallPositionNode *history = NULL;
+
 
 // == ASTRO DODGE ==
 int asteroidsDestroyed = 0;
@@ -34,73 +26,8 @@ int asteroidsToActivate = 5;
 Bullet bullets[MAX_BULLETS];
 float bulletSpeed = 500.0f;
 
-// === VARIÁVEIS GLOBAIS ===
-int grid[ROWS][COLS] = {0};
-float gameTime = 120.0f;
-bool gameEnded = false;
 GameState currentState = MENU;
 
-// === FUNÇÕES DO PONG ===
-void AppendBallPosition(BallPositionNode **head, Vector2 pos, int *count) {
-    BallPositionNode *newNode = malloc(sizeof(BallPositionNode));
-    newNode->position = pos;
-    newNode->next = NULL;
-
-    if (*head == NULL) {
-        *head = newNode;
-    } else {
-        BallPositionNode *curr = *head;
-        while (curr->next != NULL)
-            curr = curr->next;
-        curr->next = newNode;
-    }
-
-    (*count)++;
-    if (*count > MAX_HISTORY) {
-        BallPositionNode *temp = *head;
-        *head = (*head)->next;
-        free(temp);
-        (*count)--;
-    }
-}
-
-void FreeBallHistory(BallPositionNode *head) {
-    while (head != NULL) {
-        BallPositionNode *temp = head;
-        head = head->next;
-        free(temp);
-    }
-}
-
-void ResetBallHistory() {
-    FreeBallHistory(history);
-    history = NULL;
-    historyCount = 0;
-}
-
-void ResetGrid() {
-    for (int r = 0; r < ROWS; r++) {
-        for (int c = 0; c < COLS; c++) {
-            grid[r][c] = 0;
-        }
-    }
-}
-
-// == FUNÇÕES DO AVOID ==
-// void ResetAvoidGame() {
-//     avoidPlayer = (Rectangle){ 100, SCREEN_HEIGHT/2 - 25, 40, 40};
-//     avoidVelocity = 0;
-//     avoidGameOver = false;
-//     avoidStarted = false;
-//     avoidCountdown = 5.0f;
-//     avoidTime = 0.0f;
-
-//     for (int i = 0; i < MAX_WALLS; i++) {
-//         walls[i].x = SCREEN_WIDTH + i * wallSpacing;
-//         walls[i].gapY = 100 + rand() % (SCREEN_HEIGHT - WALL_GAP - 100);
-//         walls[i].passed = false;
-//     }
-// }
 
 int main(void) {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "String Slayer");
@@ -132,15 +59,7 @@ int main(void) {
     const char *menuItems[] = { "Jogar Pong", "Astro Dodge", "Avoid the Walls", "Comandos", "Sair" };
     int selectedOption = 0;
     int menuItemsCount = sizeof(menuItems) / sizeof(menuItems[0]);
-    bool pongStarted = false;
-    float pongCountdown = 5.0f;
 
-    Rectangle player1 = {30, SCREEN_HEIGHT/2 - PADDLE_HEIGHT/2, PADDLE_WIDTH, PADDLE_HEIGHT};
-    Rectangle player2 = {SCREEN_WIDTH - 40, SCREEN_HEIGHT/2 - PADDLE_HEIGHT/2, PADDLE_WIDTH, PADDLE_HEIGHT};
-    Vector2 ballPosition = {SCREEN_WIDTH/2.0f, SCREEN_HEIGHT/2.0f};
-    Vector2 ballSpeed = {BALL_SPEED, BALL_SPEED};
-    int score1 = 0, score2 = 0;
-    
     while (!WindowShouldClose()) {
         // Atualizar a música apropriada
         if (currentState == MENU) {
@@ -224,138 +143,13 @@ int main(void) {
         }
         
         else if (currentState == PONG) {
-            if (pointScored) {
-                pointDelay -= GetFrameTime();
-                if (pointDelay <= 0.0f) {
-                    pointScored = false;
-                }
-            }
-        
-            if (!pongStarted) {
-                pongCountdown -= GetFrameTime();
-        
-                int countDisplay = (int)pongCountdown + 1;
-                if (countDisplay > 0) {
-                    DrawText(TextFormat("%d", countDisplay), SCREEN_WIDTH/2 - 20, SCREEN_HEIGHT/2 - 40, 80, WHITE);
-                } else {
-                    DrawText("Vai!", SCREEN_WIDTH/2 - 40, SCREEN_HEIGHT/2 - 40, 80, WHITE);
-                }
-        
-                if (pongCountdown <= 0) {
-                    pongStarted = true;
-                }
-        
-                EndDrawing();
-                continue;
-            }
-        
-            if (!gameEnded && !pointScored) {
-                gameTime -= GetFrameTime();
-                if (gameTime <= 0.0f) {
-                    gameTime = 0.0f;
-                    gameEnded = true;
-                }
-        
-                if (IsKeyDown(KEY_W) && player1.y > 0) player1.y -= PADDLE_SPEED;
-                if (IsKeyDown(KEY_S) && player1.y + PADDLE_HEIGHT < SCREEN_HEIGHT) player1.y += PADDLE_SPEED;
-                if (IsKeyDown(KEY_UP) && player2.y > 0) player2.y -= PADDLE_SPEED;
-                if (IsKeyDown(KEY_DOWN) && player2.y + PADDLE_HEIGHT < SCREEN_HEIGHT) player2.y += PADDLE_SPEED;
-        
-                ballPosition.x += ballSpeed.x;
-                ballPosition.y += ballSpeed.y;
-        
-                int col = (int)(ballPosition.x / (SCREEN_WIDTH / COLS));
-                int row = (int)(ballPosition.y / (SCREEN_HEIGHT / ROWS));
-                if (row >= 0 && row < ROWS && col >= 0 && col < COLS) grid[row][col]++;
-        
-                AppendBallPosition(&history, ballPosition, &historyCount);
-        
-                if (ballPosition.y <= BALL_RADIUS || ballPosition.y >= SCREEN_HEIGHT - BALL_RADIUS) {
-                    if(!rebound) {
-                        ballSpeed.y *= -1;
-                        PlaySound(pongRebound);
-                        rebound = true;
-                    }
-                }else {
-                    rebound = false;
-                }
-                if (CheckCollisionCircleRec(ballPosition, BALL_RADIUS, player1) && ballSpeed.x < 0) {
-                    if(!barHit) {
-                        ballSpeed.x *= -1;
-                        PlaySound(pongBar);
-                        barHit = true;
-                        }
-                }else{
-                    barHit = false;
-                    } 
-                if (CheckCollisionCircleRec(ballPosition, BALL_RADIUS, player2) && ballSpeed.x > 0) {
-                    if(!barHit) {
-                        ballSpeed.x *= -1;
-                        PlaySound(pongBar);
-                        barHit = true;
-                        }
-                }else {
-                    barHit = false;
-                } 
-                if (ballPosition.x < 0 || ballPosition.x > SCREEN_WIDTH) {
-                    if (ballPosition.x < 0) {
-                        score2++;
-                        PlaySound(pongPoint);
-                        ballSpeed = (Vector2){-BALL_SPEED, BALL_SPEED}; // comeca a bola com quem tomou ponto
-                    }else {
-                        score1++;
-                        PlaySound(pongPoint);
-                        ballSpeed = (Vector2){BALL_SPEED, BALL_SPEED}; // comeca a bola com quem tomou ponto
-                        }
-                    ballPosition = (Vector2){SCREEN_WIDTH/2.0f, SCREEN_HEIGHT/2.0f};
-                    FreeBallHistory(history);
-                    history = NULL;
-                    historyCount = 0; // reinicia o rastro da bola
-                    ResetGrid(); // reinicia o fundo p n ficar feio
-                    pointScored = true;
-                    pointDelay = 0.5f;
-                    }
-                }                    
-        
-            // Desenho (independe se o jogo está pausado)
-            for (int r = 0; r < ROWS; r++) {
-                for (int c = 0; c < COLS; c++) {
-                    if (grid[r][c] > 0) {
-                        float intensity = (float)grid[r][c] / 10.0f;
-                        if (intensity > 1.0f) intensity = 1.0f;
-                        Color cellColor = Fade(BLUE, intensity);
-                        DrawRectangle(c * (SCREEN_WIDTH / COLS), r * (SCREEN_HEIGHT / ROWS), SCREEN_WIDTH / COLS, SCREEN_HEIGHT / ROWS, cellColor);
-                    }
-                }
-            }
-        
-            for (int i = 0; i < SCREEN_HEIGHT; i += 20)
-                DrawRectangle(SCREEN_WIDTH/2 - 1, i, 2, 10, GRAY);
-        
-            DrawRectangleRec(player1, WHITE);
-            DrawRectangleRec(player2, WHITE);
-            DrawCircleV(ballPosition, BALL_RADIUS, WHITE);
-        
-            BallPositionNode *curr = history;
-            while (curr != NULL) {
-                DrawCircleV(curr->position, 2, RED);
-                curr = curr->next;
-            }
-        
-            int seconds = (int)gameTime;
-            DrawText(TextFormat("Tempo: %02d:%02d", seconds / 60, seconds % 60), SCREEN_WIDTH/2 - 70, 10, 30, LIGHTGRAY);
-            DrawText(TextFormat("%d", score1), SCREEN_WIDTH/4, 50, 40, WHITE);
-            DrawText(TextFormat("%d", score2), 3*SCREEN_WIDTH/4, 50, 40, WHITE);
-        
-            if (gameEnded) {
-                const char *msg = (score1 > score2) ? "Jogador 1 Venceu!" : (score2 > score1) ? "Jogador 2 Venceu!" : "Empate!";
-                DrawText(msg, SCREEN_WIDTH/2 - MeasureText(msg, 40)/2, SCREEN_HEIGHT/2 - 20, 40, YELLOW);
-                DrawText("Pressione ENTER para voltar ao menu", SCREEN_WIDTH/2 - 180, SCREEN_HEIGHT/2 + 30, 20, GRAY);
-                if (IsKeyPressed(KEY_ENTER)) currentState = MENU;
-            }
-        }
-        
+            HandlePointScored();
+            DrawCountdown();
+            UpdateGame(pongPoint,pongRebound,pongBar);
+            DrawGame();
+            HandleGameEnd();
 
+        }
         // Inicio do Jogo Astro Dodge
         else if (currentState == ASTRO_DODGE) {
             static bool astroInitialized = false;
@@ -581,4 +375,5 @@ int main(void) {
     FreeBallHistory(history);
     CloseWindow();
     return 0;
-}
+    }
+

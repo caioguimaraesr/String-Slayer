@@ -63,7 +63,7 @@ void AvoidUpdate(void) {
 
         #define MIN_SPACING 250
 
-        // Incrementa pipesPassed quando o cano passar do jogador
+        // Incrementa pipePassed quando o cano passar do jogador
         if (!walls[i].passed && (walls[i].x + WALL_WIDTH) < avoidPlayer.x) {
             pipePassed++;
             walls[i].passed = true;
