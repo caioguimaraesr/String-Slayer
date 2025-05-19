@@ -110,7 +110,7 @@ git clone https://github.com/raysan5/raylib.git
 cd raylib
 mkdir build && cd build
 cmake -DPLATFORM=Desktop ..
-make -j$(nproc)
+make
 sudo make install
 ```
 OBS: Caso já possua a raylib instalada, pule esse passo.
@@ -133,7 +133,7 @@ make clean
 
 <p> 
 🏓 Pong — clássico dos arcades, jogável com dois jogadores locais. <br>
-🚀 Astro Dodge — desvie de asteroides e sobreviva o máximo possível.<br>
+🚀 Astro Dodge — desvie e se proteja dos asteroides e sobreviva o máximo possível.<br>
 🐤 Avoid the Walls — estilo Flappy Bird, teste seus reflexos!
 </p>
 
