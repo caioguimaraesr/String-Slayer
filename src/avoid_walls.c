@@ -13,8 +13,7 @@ static Rectangle avoidPlayer;
 static float avoidVelocity = 0;
 static float avoidGravity = 500;
 static float avoidJumpForce = -250;
-static float avoidTime = 0;
-static float avoidBestTime = 0;
+static int pipePassedRecord = 0;
 static bool avoidGameOver = false;
 static bool avoidStarted = false;
 static float avoidCountdown = 3.0f;
@@ -22,6 +21,7 @@ static float avoidCountdown = 3.0f;
 static Wall walls[MAX_WALLS];
 static float wallSpacing = 300;
 static float wallSpeed = 200;
+static int pipePassed;
 
 void AvoidInit(void) {
     background = LoadTexture("assets/images/Fundo Avoid the Walls.png");
@@ -30,7 +30,6 @@ void AvoidInit(void) {
 
     avoidPlayer = (Rectangle){ 100, SCREEN_HEIGHT/2, 34, 24 };
     avoidVelocity = 0;
-    avoidTime = 0;
     avoidGameOver = false;
     avoidStarted = false;
     avoidCountdown = 3.0f;
@@ -49,11 +48,10 @@ void AvoidUpdate(void) {
         avoidCountdown -= GetFrameTime();
         if (avoidCountdown <= 0) {
             avoidStarted = true;
+            pipePassed = 0;
         }
         return;
     }
-
-    avoidTime += GetFrameTime();
 
     if (IsKeyPressed(KEY_SPACE)) avoidVelocity = avoidJumpForce;
 
@@ -65,18 +63,23 @@ void AvoidUpdate(void) {
 
         #define MIN_SPACING 250
 
-// no AvoidUpdate, dentro do for das paredes:
+        // Incrementa pipesPassed quando o cano passar do jogador
+        if (!walls[i].passed && (walls[i].x + WALL_WIDTH) < avoidPlayer.x) {
+            pipePassed++;
+            walls[i].passed = true;
+        }
+
         if (walls[i].x + WALL_WIDTH < 0) {
             float maxX = 0;
             for (int j = 0; j < MAX_WALLS; j++) {
                 if (walls[j].x > maxX) maxX = walls[j].x;
-    }
-    
+            }
+
             float spacing = MIN_SPACING + (rand() % 201); // espaçamento aleatório entre 250 e 450 px
             walls[i].x = maxX + spacing;
             walls[i].gapY = 100 + rand() % (SCREEN_HEIGHT - WALL_GAP - 100);
             walls[i].passed = false;
-}
+        }
 
         Rectangle topWall = { walls[i].x, 0, WALL_WIDTH, walls[i].gapY };
         Rectangle bottomWall = { walls[i].x, walls[i].gapY + WALL_GAP, WALL_WIDTH, SCREEN_HEIGHT - (walls[i].gapY + WALL_GAP) };
@@ -84,7 +87,7 @@ void AvoidUpdate(void) {
         if (CheckCollisionRecs(avoidPlayer, topWall) || CheckCollisionRecs(avoidPlayer, bottomWall) ||
             avoidPlayer.y < 0 || avoidPlayer.y + avoidPlayer.height > SCREEN_HEIGHT) {
             avoidGameOver = true;
-            if (avoidTime > avoidBestTime) avoidBestTime = avoidTime;
+            if (pipePassed > pipePassedRecord) pipePassedRecord = pipePassed;
         }
     }
 }
@@ -121,8 +124,8 @@ void AvoidDraw(void) {
             }
 
             DrawTextureEx(birdTexture, (Vector2){avoidPlayer.x, avoidPlayer.y}, 0.0f, 0.5f, WHITE);
-            DrawText(TextFormat("Tempo: %.2f", avoidTime), 20, 20, 20, WHITE);
-            DrawText(TextFormat("Melhor: %.2f", avoidBestTime), 20, 50, 20, YELLOW);
+            DrawText(TextFormat("Pontuação: %d", pipePassed), 20, 20, 20, WHITE);
+            DrawText(TextFormat("Melhor: %d", pipePassedRecord), 20, 50, 20, YELLOW);
         }
     } else {
         DrawText("Game Over!", SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT/2 - 30, 40, RED);
@@ -134,8 +137,8 @@ bool AvoidIsGameOver(void) {
     return avoidGameOver;
 }
 
-float AvoidGetBestTime(void) {
-    return avoidBestTime;
+int AvoidRecord(void) {
+    return pipePassedRecord;
 }
 
 void AvoidUnload(void) {

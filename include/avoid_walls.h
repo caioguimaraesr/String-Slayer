@@ -20,7 +20,7 @@ void AvoidUpdate(void);
 void AvoidDraw(void);
 void AvoidUnload(void);
 bool AvoidIsGameOver(void);
-float AvoidGetBestTime(void);
+int AvoidRecord(void);
 
 #endif
 
