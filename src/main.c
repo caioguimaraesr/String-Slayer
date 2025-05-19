@@ -1,28 +1,10 @@
 #include "raylib.h"
+#include "pong.h"
+#include "astro_dodge.h"
+#include "avoid_walls.h"
+#include "game.h"
 #include <stdlib.h>
 #include <time.h>
-
-// === DEFINIÇÕES ===
-#define SCREEN_WIDTH 800
-#define SCREEN_HEIGHT 500
-#define PADDLE_WIDTH 10
-#define PADDLE_HEIGHT 100
-#define PADDLE_SPEED 14
-#define BALL_RADIUS 8
-#define BALL_SPEED 10
-#define MAX_HISTORY 100
-#define ROWS 15
-#define COLS 20
-#define MAX_ASTEROIDS 20
-#define WALL_WIDTH 80
-#define WALL_GAP 200
-#define MAX_WALLS 5
-#define MAX_BULLETS 50
-
-typedef struct Bullet {
-    Vector2 position;
-    bool active;
-} Bullet;
 
 Bullet bullets[MAX_BULLETS];
 float bulletSpeed = 500.0f;
@@ -31,12 +13,6 @@ Rectangle avoidPlayer;
 float avoidVelocity = 0;
 float avoidGravity = 600;
 float avoidJumpForce = -300;
-
-typedef struct {
-    float x;
-    float gapY;
-    bool passed;
-} Wall;
 
 Wall walls[MAX_WALLS];
 float wallSpeed = 200;
@@ -49,27 +25,6 @@ float avoidCountdown = 5.0f;
 bool pointScored = false;
 float pointDelay = 0.0f;
 
-// === ENUM ESTADO DO JOGO ===
-typedef enum GameState {
-    MENU,
-    PONG,
-    ASTRO_DODGE,
-    AVOID_WALLS,
-    COMMANDS,
-} GameState;
-
-// === ESTRUTURAS ===
-typedef struct BallPositionNode {
-    Vector2 position;
-    struct BallPositionNode *next;
-} BallPositionNode;
-
-typedef struct Asteroid {
-    Vector2 position;
-    float speed;
-    bool active;
-} Asteroid;
-
 // === VARIÁVEIS GLOBAIS ===
 int grid[ROWS][COLS] = {0};
 float gameTime = 120.0f;
@@ -81,6 +36,7 @@ int asteroidsDestroyed = 0;
 int asteroidsToActivate = 5;
 static bool rebound = false;
 static bool barHit = false;
+
 
 // === FUNÇÕES DE RASTRO ===
 void AppendBallPosition(BallPositionNode **head, Vector2 pos, int *count) {
