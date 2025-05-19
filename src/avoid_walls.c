@@ -5,8 +5,6 @@
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 600
 
-
-
 static Texture2D background;
 static Texture2D birdTexture;
 static Texture2D pipeTexture;
@@ -65,11 +63,20 @@ void AvoidUpdate(void) {
     for (int i = 0; i < MAX_WALLS; i++) {
         walls[i].x -= wallSpeed * GetFrameTime();
 
+        #define MIN_SPACING 250
+
+// no AvoidUpdate, dentro do for das paredes:
         if (walls[i].x + WALL_WIDTH < 0) {
-            walls[i].x = SCREEN_WIDTH + wallSpacing;
+            float maxX = 0;
+            for (int j = 0; j < MAX_WALLS; j++) {
+                if (walls[j].x > maxX) maxX = walls[j].x;
+    }
+    
+            float spacing = MIN_SPACING + (rand() % 201); // espaçamento aleatório entre 250 e 450 px
+            walls[i].x = maxX + spacing;
             walls[i].gapY = 100 + rand() % (SCREEN_HEIGHT - WALL_GAP - 100);
             walls[i].passed = false;
-        }
+}
 
         Rectangle topWall = { walls[i].x, 0, WALL_WIDTH, walls[i].gapY };
         Rectangle bottomWall = { walls[i].x, walls[i].gapY + WALL_GAP, WALL_WIDTH, SCREEN_HEIGHT - (walls[i].gapY + WALL_GAP) };
@@ -99,10 +106,10 @@ void AvoidDraw(void) {
                 Rectangle bottomWall = { walls[i].x, walls[i].gapY + WALL_GAP, WALL_WIDTH, SCREEN_HEIGHT - (walls[i].gapY + WALL_GAP) };
 
                 DrawTexturePro(pipeTexture,
-                    (Rectangle){0, 0, pipeTexture.width, -pipeTexture.height},
-                    topWall, 
-                    (Vector2){0, 0},  
-                    0.0f, 
+                    (Rectangle){0, 0, pipeTexture.width, pipeTexture.height},
+                    topWall,
+                    (Vector2){0, 0},
+                    0.0f,
                     WHITE);
 
                 DrawTexturePro(pipeTexture,

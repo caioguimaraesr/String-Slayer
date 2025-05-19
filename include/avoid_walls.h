@@ -7,15 +7,13 @@
 #define WALL_WIDTH 80
 #define WALL_GAP 200
 #define MAX_WALLS 5
-
+#define MIN_SPACING 250
 // === ESTRUTURAS AVOID WALLS ===
 typedef struct {
     float x;
     float gapY;
     bool passed;
 } Wall;
-
-#include "raylib.h"
 
 void AvoidInit(void);
 void AvoidUpdate(void);
