@@ -136,7 +136,7 @@ int main(void) {
                 
                 // Ajuste as coordenadas Y e X aqui:
                 int x = SCREEN_WIDTH / 2 - textWidth / 2;
-                int y = 270 + i * 40;  // 200 é o topo inicial, 50 é o espaçamento vertical
+                int y = 340 + i * 40;  // 200 é o topo inicial, 50 é o espaçamento vertical
 
                 DrawText(text, x, y, fontSize, color);
             }
@@ -148,7 +148,6 @@ int main(void) {
             UpdateGame(pongPoint,pongRebound,pongBar);
             DrawGame();
             HandleGameEnd();
-
         }
         // Inicio do Jogo Astro Dodge
         else if (currentState == ASTRO_DODGE) {
