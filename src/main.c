@@ -35,12 +35,11 @@ int main(void) {
     Texture2D shipTexture = LoadTexture("assets/images/nave_espacial.png");
     Texture2D asteroidTexture = LoadTexture("assets/images/asteroid.png");
     Texture2D menuBackground = LoadTexture("assets/images/String Slayer - Background.png");
-    Texture2D birdTexture = LoadTexture("assets/images/Flávio Caça-Rato.png");
     Texture2D background = LoadTexture("assets/images/Fundo-avoid.jpg");
     Texture2D pipeTexture = LoadTexture("assets/images/pipe.png");
     Texture2D menuGameBackground = LoadTexture("assets/images/Photo.png");
 
-    
+
     InitAudioDevice();
     srand(time(NULL));
 
@@ -304,7 +303,6 @@ int main(void) {
     // Images
     UnloadTexture(pipeTexture);
     UnloadTexture(background);
-    UnloadTexture(birdTexture);
     UnloadTexture(asteroidTexture);
     UnloadTexture(shipTexture);
     UnloadTexture(menuGameBackground);

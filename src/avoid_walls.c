@@ -8,7 +8,6 @@
 static Texture2D background;
 static Texture2D birdTexture;
 static Texture2D pipeTexture;
-
 static Rectangle avoidPlayer;
 static float avoidVelocity = 0;
 static float avoidGravity = 500;
@@ -17,7 +16,6 @@ static int pipePassedRecord = 0;
 static bool avoidGameOver = false;
 static bool avoidStarted = false;
 static float avoidCountdown = 3.0f;
-
 static Wall walls[MAX_WALLS];
 static float wallSpacing = 300;
 static float wallSpeed = 200;
@@ -62,6 +60,7 @@ void AvoidUpdate(void) {
     if (IsKeyPressed(KEY_SPACE)) {
         avoidVelocity = avoidJumpForce;
         PlaySound(flapSound);
+        SetSoundVolume(flapSound,0.5f);
     }
 
     avoidVelocity += avoidGravity * GetFrameTime();
@@ -72,11 +71,12 @@ void AvoidUpdate(void) {
 
         #define MIN_SPACING 250
 
-        // Incrementa pipePassed quando o cano passar do jogador
+      
         if (!walls[i].passed && (walls[i].x + WALL_WIDTH) < avoidPlayer.x) {
             pipePassed++;
             walls[i].passed = true;
             PlaySound(pointSound);
+            SetSoundVolume(pointSound,0.05f);
         }
 
         if (walls[i].x + WALL_WIDTH < 0) {
@@ -85,7 +85,7 @@ void AvoidUpdate(void) {
                 if (walls[j].x > maxX) maxX = walls[j].x;
             }
 
-            float spacing = MIN_SPACING + (rand() % 201); // espaçamento aleatório entre 250 e 450 px
+            float spacing = MIN_SPACING + (rand() % 201);
             walls[i].x = maxX + spacing;
             walls[i].gapY = 100 + rand() % (SCREEN_HEIGHT - WALL_GAP - 100);
             walls[i].passed = false;
@@ -99,6 +99,7 @@ void AvoidUpdate(void) {
             avoidGameOver = true;
             if (pipePassed > pipePassedRecord) pipePassedRecord = pipePassed;
             PlaySound(gameOverSound);
+            SetSoundVolume(gameOverSound,0.15f);
         }
     }
 }

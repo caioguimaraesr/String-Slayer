@@ -7,6 +7,8 @@
 #define SCREEN_HEIGHT 600
 #define MAX_ASTEROIDS 15
 #define MAX_BULLETS 50
+#define MAX_AMMO_DROPS 10
+
 
 typedef struct Bullet {
     Vector2 position;
@@ -19,6 +21,11 @@ typedef struct Asteroid {
     bool active;
 } Asteroid;
 
+typedef struct {
+    Vector2 position;
+    float speed;
+    bool active;
+}AmmoDrop;
 
 void InitAstroDodge(Texture2D shipTex, Texture2D asteroidTex);
 void UpdateAstroDodge(void);

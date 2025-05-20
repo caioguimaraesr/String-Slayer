@@ -18,14 +18,19 @@ static Sound shootSound;
 static Texture2D shipTexture;
 static Texture2D asteroidTexture;
 static int ammo = 15; 
+static Rectangle ammoPickup;
+static bool ammoPickupActive = false;
+static float ammoSpawnTimer = 0.0f;
+static Texture2D ammoTexture; 
 static bool returnToMenu = false;
-
+static AmmoDrop ammoDrops[MAX_AMMO_DROPS];
+static float ammoDropTimer = 0.0f; 
 static const float bulletSpeed = 500.0f;
 
 void InitAstroDodge(Texture2D shipTex, Texture2D asteroidTex) {
     shipTexture = shipTex;
     asteroidTexture = asteroidTex;
-
+    ammoTexture = LoadTexture("assets/images/municao.png");
     player = (Rectangle){ SCREEN_WIDTH/2.0f - 20, SCREEN_HEIGHT - 60, 40, 40 };
     playerSpeed = 5.0f;
     survivalTime = 0.0f;
@@ -34,6 +39,9 @@ void InitAstroDodge(Texture2D shipTex, Texture2D asteroidTex) {
     gameOver = false;
     returnToMenu = false;
     ammo = 15;
+    ammoSpawnTimer = 0.0f;
+    ammoPickupActive = false;
+    ammoPickup = (Rectangle){ 0, 0, 30, 30 };
     score = 0;
     hitSound = LoadSound("assets/music/Hit-Astro.wav");
     shootSound = LoadSound("assets/music/Tiro-Astro.wav");
@@ -49,6 +57,12 @@ void InitAstroDodge(Texture2D shipTex, Texture2D asteroidTex) {
     for (int i = 0; i < MAX_BULLETS; i++) {
         bullets[i].active = false;
     }
+    for (int i = 0; i < MAX_AMMO_DROPS; i++) {
+        ammoDrops[i].active = false;
+        ammoDrops[i].position = (Vector2){0, 0};
+        ammoDrops[i].speed = 6 + rand() % 2; 
+    }
+    ammoDropTimer = 0.0f;
 }
 
 void UpdateAstroDodge(void) {
@@ -80,11 +94,12 @@ void UpdateAstroDodge(void) {
                 bullets[i].active = true;
                 bullets[i].position = (Vector2){ player.x + player.width / 2, player.y };
                 PlaySound(shootSound);
-                ammo--;  
+                ammo--;
                 break;
             }
         }
     }
+
     for (int i = 0; i < MAX_ASTEROIDS; i++) {
         if (asteroids[i].active) {
             asteroids[i].position.y += asteroids[i].speed;
@@ -105,6 +120,7 @@ void UpdateAstroDodge(void) {
         }
     }
 
+
     for (int i = 0; i < MAX_BULLETS; i++) {
         if (bullets[i].active) {
             bullets[i].position.y -= bulletSpeed * GetFrameTime();
@@ -118,10 +134,41 @@ void UpdateAstroDodge(void) {
                         asteroids[j].speed = 5 + rand() % 2;
                         asteroids[j].active = true;
                         bullets[i].active = false;
-                        score+=20;  
+                        score += 20;
                         break;
                     }
                 }
+            }
+        }
+    }
+
+    ammoDropTimer += GetFrameTime();
+    if (ammoDropTimer >= 10.0f) {
+        ammoDropTimer = 0.0f;
+        for (int i = 0; i < MAX_AMMO_DROPS; i++) {
+            if (!ammoDrops[i].active) {
+                ammoDrops[i].active = true;
+                ammoDrops[i].position.x = rand() % (SCREEN_WIDTH - 30);
+                ammoDrops[i].position.y = -30; 
+                ammoDrops[i].speed = 80 + rand() % 40; 
+                break;
+            }
+        }
+    }
+
+
+    for (int i = 0; i < MAX_AMMO_DROPS; i++) {
+        if (ammoDrops[i].active) {
+            ammoDrops[i].position.y += ammoDrops[i].speed * GetFrameTime();
+            if (ammoDrops[i].position.y > SCREEN_HEIGHT) {
+                ammoDrops[i].active = false;  
+            }
+
+            Rectangle ammoRect = { ammoDrops[i].position.x, ammoDrops[i].position.y, 30, 30 };
+            if (CheckCollisionRecs(player, ammoRect)) {
+                ammoDrops[i].active = false;
+                ammo += 10;  
+                PlaySound(shootSound); 
             }
         }
     }
@@ -163,6 +210,11 @@ void DrawAstroDodge(void) {
         DrawText("Game Over!", SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT/2 - 20, 40, YELLOW);
         DrawText("Pressione ENTER para voltar ao menu", SCREEN_WIDTH/2 - 180, SCREEN_HEIGHT/2 + 30, 20, GRAY);
     }
+    for (int i = 0; i < MAX_AMMO_DROPS; i++) {
+        if (ammoDrops[i].active) {
+            DrawTexture(ammoTexture, ammoDrops[i].position.x, ammoDrops[i].position.y, WHITE);
+        }
+    }
 }
 
 void RestartAstroDodge(void) {
@@ -174,6 +226,7 @@ void RestartAstroDodge(void) {
 void UnloadAstroDodge(void) {
     UnloadSound(hitSound);
     UnloadSound(shootSound);
+    UnloadTexture(ammoTexture);
 }
 
 bool IsAstroGameOver(void) {
