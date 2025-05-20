@@ -17,29 +17,34 @@ static Sound hitSound;
 static Sound shootSound;
 static Texture2D shipTexture;
 static Texture2D asteroidTexture;
+static Texture2D ammoTexture; 
+static Texture2D diamondTexture;
+static Texture2D diamond2Texture;
 static int ammo = 15; 
 static Rectangle ammoPickup;
 static bool ammoPickupActive = false;
-static float ammoSpawnTimer = 0.0f;
-static Texture2D ammoTexture; 
+static float diamondSpawnTimer = 0.0f;
 static bool returnToMenu = false;
 static AmmoDrop ammoDrops[MAX_AMMO_DROPS];
 static float ammoDropTimer = 0.0f; 
 static const float bulletSpeed = 500.0f;
+static Diamond diamonds[MAX_DIAMONDS];
 
 void InitAstroDodge(Texture2D shipTex, Texture2D asteroidTex) {
     shipTexture = shipTex;
     asteroidTexture = asteroidTex;
     ammoTexture = LoadTexture("assets/images/municao.png");
+    diamondTexture = LoadTexture("assets/images/Diamante.png");
+    diamond2Texture = LoadTexture("assets/images/Diamante2.png");
     player = (Rectangle){ SCREEN_WIDTH/2.0f - 20, SCREEN_HEIGHT - 60, 40, 40 };
     playerSpeed = 5.0f;
     survivalTime = 0.0f;
     startCountdown = 5.0f;
+    diamondSpawnTimer = 0.0f;
     gameStarted = false;
     gameOver = false;
     returnToMenu = false;
     ammo = 15;
-    ammoSpawnTimer = 0.0f;
     ammoPickupActive = false;
     ammoPickup = (Rectangle){ 0, 0, 30, 30 };
     score = 0;
@@ -63,6 +68,10 @@ void InitAstroDodge(Texture2D shipTex, Texture2D asteroidTex) {
         ammoDrops[i].speed = 6 + rand() % 2; 
     }
     ammoDropTimer = 0.0f;
+
+    for (int i = 0; i < MAX_DIAMONDS; i++) {
+        diamonds[i].active = false;
+    }
 }
 
 void UpdateAstroDodge(void) {
@@ -82,7 +91,6 @@ void UpdateAstroDodge(void) {
     }
 
     survivalTime += GetFrameTime();
-
     if (IsKeyDown(KEY_LEFT) && player.x > 0) player.x -= playerSpeed;
     if (IsKeyDown(KEY_RIGHT) && player.x + player.width < SCREEN_WIDTH) player.x += playerSpeed;
     if (IsKeyDown(KEY_UP) && player.y > 0) player.y -= playerSpeed;
@@ -99,7 +107,6 @@ void UpdateAstroDodge(void) {
             }
         }
     }
-
     for (int i = 0; i < MAX_ASTEROIDS; i++) {
         if (asteroids[i].active) {
             asteroids[i].position.y += asteroids[i].speed;
@@ -134,7 +141,7 @@ void UpdateAstroDodge(void) {
                         asteroids[j].speed = 5 + rand() % 2;
                         asteroids[j].active = true;
                         bullets[i].active = false;
-                        score += 20;
+                        score += 150;
                         break;
                     }
                 }
@@ -168,11 +175,40 @@ void UpdateAstroDodge(void) {
             if (CheckCollisionRecs(player, ammoRect)) {
                 ammoDrops[i].active = false;
                 ammo += 10;  
-                PlaySound(shootSound); 
             }
         }
     }
+    diamondSpawnTimer += GetFrameTime();
+    if (diamondSpawnTimer >= 7.0f) {
+        diamondSpawnTimer = 0.0f;
+        for (int i = 0; i < MAX_DIAMONDS; i++) {
+            if (!diamonds[i].active) {
+                diamonds[i].active = true;
+                diamonds[i].position.x = rand() % (SCREEN_WIDTH - 30);
+                diamonds[i].position.y = -30;
+                diamonds[i].speed = 100 + rand() % 40;  
+                diamonds[i].value = (rand() % 2 == 0) ? 1000 : 2500; 
+                break;
+        }
+    }
 }
+    for (int i = 0; i < MAX_DIAMONDS; i++) {
+        if (diamonds[i].active) {
+        diamonds[i].position.y += diamonds[i].speed * GetFrameTime();
+            if (diamonds[i].position.y > SCREEN_HEIGHT) {
+                diamonds[i].active = false;
+            }
+
+            Rectangle diamondRect = { diamonds[i].position.x, diamonds[i].position.y, 30, 30 };
+            if (CheckCollisionRecs(player, diamondRect)) {
+                diamonds[i].active = false;
+                score += diamonds[i].value;
+        }
+    }
+}
+
+    }
+
 
 void DrawAstroDodge(void) {
     ClearBackground(BLACK);
@@ -215,18 +251,31 @@ void DrawAstroDodge(void) {
             DrawTexture(ammoTexture, ammoDrops[i].position.x, ammoDrops[i].position.y, WHITE);
         }
     }
+    for (int i = 0; i < MAX_DIAMONDS; i++) {
+        if (diamonds[i].active) {
+            if (diamonds[i].value == 1000) {
+                float scale = 1.3f;
+                DrawTextureEx(diamondTexture, diamonds[i].position, 0.0f, scale, WHITE);
+            } else {
+                float scale = 1.5f;
+                DrawTextureEx(diamond2Texture, diamonds[i].position, 0.0f, scale , WHITE);
+            }
+        }
+    }    
 }
 
 void RestartAstroDodge(void) {
     UnloadSound(hitSound);
     UnloadSound(shootSound);
-    InitAstroDodge(shipTexture, asteroidTexture);
+    InitAstroDodge(shipTexture, asteroidTexture); 
+    UnloadTexture(ammoTexture);
+    UnloadTexture(diamondTexture);
+    UnloadTexture(diamond2Texture);
 }
 
 void UnloadAstroDodge(void) {
     UnloadSound(hitSound);
     UnloadSound(shootSound);
-    UnloadTexture(ammoTexture);
 }
 
 bool IsAstroGameOver(void) {

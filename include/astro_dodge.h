@@ -8,7 +8,7 @@
 #define MAX_ASTEROIDS 15
 #define MAX_BULLETS 50
 #define MAX_AMMO_DROPS 10
-
+#define MAX_DIAMONDS 10
 
 typedef struct Bullet {
     Vector2 position;
@@ -26,6 +26,13 @@ typedef struct {
     float speed;
     bool active;
 }AmmoDrop;
+
+typedef struct Diamond {
+    Vector2 position;
+    float speed;
+    bool active;
+    int value;
+} Diamond;
 
 void InitAstroDodge(Texture2D shipTex, Texture2D asteroidTex);
 void UpdateAstroDodge(void);
