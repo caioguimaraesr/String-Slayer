@@ -40,6 +40,7 @@ int main(void) {
     Texture2D pipeTexture = LoadTexture("assets/images/pipe.png");
     Texture2D menuGameBackground = LoadTexture("assets/images/Photo.png");
 
+    
     InitAudioDevice();
     srand(time(NULL));
 
@@ -56,6 +57,7 @@ int main(void) {
     SetSoundVolume(pongPoint,0.05f);
     SetSoundVolume(pongBar,0.05f);
     SetSoundVolume(pongRebound,0.05f);
+
 
     SetTargetFPS(60);
     
@@ -226,165 +228,27 @@ int main(void) {
         // Inicio do Jogo Astro Dodge
         else if (currentState == ASTRO_DODGE) {
             static bool astroInitialized = false;
-            static Rectangle player;
-            static float playerSpeed;
-            static Asteroid asteroids[MAX_ASTEROIDS];
-            static bool gameOver;
-            static float survivalTime;
-            static Sound hitSound;
-            static float bestTime = 0.0f;
-            static float startCountdown;
-            static bool gameStarted;
-            static Sound shootSound;
 
-            if (!astroInitialized) {
-                player = (Rectangle){ SCREEN_WIDTH/2.0f - 20, SCREEN_HEIGHT - 60, 40, 40 };
-                playerSpeed = 10.0f;
-                shootSound = LoadSound("assets/music/Tiro-Astro.wav");
-                for (int i = 0; i < MAX_ASTEROIDS; i++) {
-                    asteroids[i].position = (Vector2){ rand() % SCREEN_WIDTH, (float)(-(rand() % 600)) };
-                    asteroids[i].speed = 5 + rand() % 2; // Velocidade dos asteroides
-                    asteroids[i].active = true;
-                }
+        
+        if (!astroInitialized) {
+            InitAstroDodge(shipTexture, asteroidTexture);  // certifique-se de passar as texturas certas
+            astroInitialized = true;
+        }
 
-                for (int i = 0; i < MAX_BULLETS; i++) {
-                    bullets[i].active = false;
-                }
+        UpdateAstroDodge();
+        DrawAstroDodge();
 
-                gameOver = false;
-                survivalTime = 0.0f;
-                hitSound = LoadSound("assets/music/Hit-Astro.wav");
-                astroInitialized = true;
-                startCountdown = 5.0f;
-                gameStarted = false;
-            }
+        if (AstroWantsToReturnToMenu()) {
+            UnloadAstroDodge();
+            astroInitialized = false;  // resetar para permitir reinicialização depois
+            currentState = GAMES_MENU;
+        }
 
-            // TIMER DE INÍCIO ANTES DO ASTRO COMEÇAR
-            if (!gameStarted) {
-                startCountdown -= GetFrameTime();
+        if (IsKeyPressed(KEY_R)) {
+            RestartAstroDodge();
+        }
+}
 
-                int countDisplay = (int)startCountdown + 1;
-                if (countDisplay > 0) {
-                    DrawText(TextFormat("%d", countDisplay), SCREEN_WIDTH/2 - 20, SCREEN_HEIGHT/2 - 40, 80, WHITE);
-                } else {
-                    DrawText("Vai!", SCREEN_WIDTH/2 - 40, SCREEN_HEIGHT/2 - 40, 80, WHITE);
-                }
-
-                if (startCountdown <= 0) {
-                    gameStarted = true;
-                }
-
-                EndDrawing();
-                continue;
-            }
-            
-            if (!gameOver) {
-                survivalTime += GetFrameTime();
-                if (IsKeyDown(KEY_LEFT) && player.x > 0) player.x -= playerSpeed;
-                if (IsKeyDown(KEY_RIGHT) && player.x + player.width < SCREEN_WIDTH) player.x += playerSpeed;
-                if (IsKeyDown(KEY_UP) && player.y > 0) player.y -= playerSpeed;
-                if (IsKeyDown(KEY_DOWN) && player.y + player.height < SCREEN_HEIGHT) player.y += playerSpeed;
-
-                if (IsKeyPressed(KEY_SPACE)) {
-                    for (int i = 0; i < MAX_BULLETS; i++) {
-                        if (!bullets[i].active) {
-                            bullets[i].active = true;
-                            bullets[i].position = (Vector2){
-                                player.x + player.width / 2,
-                                player.y
-                            };
-                            PlaySound(shootSound);
-                            break;
-                        }
-                    }
-                }
-
-                for (int i = 0; i < MAX_ASTEROIDS; i++) {
-                    if (asteroids[i].active) {
-                        asteroids[i].position.y += asteroids[i].speed;
-                        if (asteroids[i].position.y > SCREEN_HEIGHT) {
-                            asteroids[i].position.y = -10;
-                            asteroids[i].position.x = rand() % SCREEN_WIDTH;
-                            asteroids[i].speed = 10 + rand() % 6;
-                        }
-                        Rectangle asteroidRect = { asteroids[i].position.x, asteroids[i].position.y, 30, 30 };
-                        if (CheckCollisionRecs(player, asteroidRect)) {
-                            PlaySound(hitSound);
-                            gameOver = true;
-                            if (survivalTime > bestTime) {
-                                bestTime = survivalTime;
-                            }
-                        }
-                    }
-                }
-
-                for (int i = 0; i < MAX_BULLETS; i++) {
-                    if (bullets[i].active) {
-                        bullets[i].position.y -= bulletSpeed * GetFrameTime();
-
-                        if (bullets[i].position.y < 0) {
-                            bullets[i].active = false;
-                        }
-
-                        for (int j = 0; j < MAX_ASTEROIDS; j++) {
-                            if (asteroids[j].active) {
-                                Rectangle asteroidRect = { asteroids[j].position.x, asteroids[j].position.y, 30, 30 };
-                                if (CheckCollisionCircleRec(bullets[i].position, 5, asteroidRect)) {
-                                    asteroids[j].active = false;
-                                    bullets[i].active = false;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-                
-            DrawTexturePro(
-                shipTexture,
-                (Rectangle){ 0, 0, (float)shipTexture.width, (float)shipTexture.height },
-                (Rectangle){ player.x, player.y, player.width, player.height },
-                (Vector2){ 0, 0 },
-                0.0f,
-                WHITE
-            );
-
-            for (int i = 0; i < MAX_BULLETS; i++) {
-                if (bullets[i].active) {
-                    DrawCircleV(bullets[i].position, 5, YELLOW);
-                }
-            }
-
-            for (int i = 0; i < MAX_ASTEROIDS; i++) {
-                if (asteroids[i].active)
-                    DrawTextureEx(asteroidTexture, asteroids[i].position, 0.0f, 30.0f / asteroidTexture.width, WHITE);
-            }
-            DrawText(TextFormat("Tempo: %.2f", survivalTime), 10, 10, 20, WHITE);
-            DrawText(TextFormat("Melhor: %.2f", bestTime), 10, 40, 20, YELLOW);
-
-            if (gameOver) {
-                DrawText("Game Over!", SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT/2 - 20, 40, YELLOW);
-                DrawText("Pressione ENTER para voltar ao menu", SCREEN_WIDTH/2 - 180, SCREEN_HEIGHT/2 + 30, 20, GRAY);
-                if (IsKeyPressed(KEY_ENTER)) {
-                    astroInitialized = false;
-                    UnloadSound(hitSound);
-                    UnloadSound(shootSound);
-                    currentState = GAMES_MENU;
-                }
-            }
-
-            if (IsKeyPressed(KEY_R)) {
-                astroInitialized = false;
-                UnloadSound(hitSound);
-            }
-
-            if (IsKeyPressed(KEY_M)) {
-                astroInitialized = false;
-                UnloadSound(hitSound);
-                currentState = MENU;
-            }
-            
-        } 
 
         // Inicio do Jogo Avoid Walls
         else if (currentState == AVOID_WALLS) {

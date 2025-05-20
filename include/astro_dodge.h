@@ -3,11 +3,11 @@
 
 #include "raylib.h"
 
-// === DEFINIÇÕES ASTRO DODGE ===
-#define MAX_ASTEROIDS 20
+#define SCREEN_WIDTH 800
+#define SCREEN_HEIGHT 600
+#define MAX_ASTEROIDS 18
 #define MAX_BULLETS 50
 
-// === ESTRUTURAS ASTRO DODGE ===
 typedef struct Bullet {
     Vector2 position;
     bool active;
@@ -19,4 +19,12 @@ typedef struct Asteroid {
     bool active;
 } Asteroid;
 
+
+void InitAstroDodge(Texture2D shipTex, Texture2D asteroidTex);
+void UpdateAstroDodge(void);
+void DrawAstroDodge(void);
+void UnloadAstroDodge(void);
+bool IsAstroGameOver(void);
+void RestartAstroDodge(void);
+bool AstroWantsToReturnToMenu(void);
 #endif
