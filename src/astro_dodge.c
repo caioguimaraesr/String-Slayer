@@ -1,5 +1,7 @@
 #include "astro_dodge.h"
 #include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
 
 static Rectangle player;
 static float playerSpeed;
@@ -10,12 +12,12 @@ static float survivalTime = 0.0f;
 static float bestTime = 0.0f;
 static float startCountdown = 3.0f;
 static bool gameStarted = false;
-
+static int score = 0;
 static Sound hitSound;
 static Sound shootSound;
 static Texture2D shipTexture;
 static Texture2D asteroidTexture;
-
+static int ammo = 15; 
 static bool returnToMenu = false;
 
 static const float bulletSpeed = 500.0f;
@@ -31,12 +33,13 @@ void InitAstroDodge(Texture2D shipTex, Texture2D asteroidTex) {
     gameStarted = false;
     gameOver = false;
     returnToMenu = false;
-
+    ammo = 15;
+    score = 0;
     hitSound = LoadSound("assets/music/Hit-Astro.wav");
     shootSound = LoadSound("assets/music/Tiro-Astro.wav");
     SetSoundVolume(hitSound,0.3f);
     SetSoundVolume(shootSound,0.3f);
-    
+
     for (int i = 0; i < MAX_ASTEROIDS; i++) {
         asteroids[i].position = (Vector2){ rand() % SCREEN_WIDTH, (float)(-(rand() % 600)) };
         asteroids[i].speed = 6 + rand() % 2;
@@ -71,17 +74,17 @@ void UpdateAstroDodge(void) {
     if (IsKeyDown(KEY_UP) && player.y > 0) player.y -= playerSpeed;
     if (IsKeyDown(KEY_DOWN) && player.y + player.height < SCREEN_HEIGHT) player.y += playerSpeed;
 
-    if (IsKeyPressed(KEY_SPACE)) {
+    if (IsKeyPressed(KEY_SPACE) && ammo > 0) {
         for (int i = 0; i < MAX_BULLETS; i++) {
             if (!bullets[i].active) {
                 bullets[i].active = true;
                 bullets[i].position = (Vector2){ player.x + player.width / 2, player.y };
                 PlaySound(shootSound);
+                ammo--;  
                 break;
             }
         }
     }
-
     for (int i = 0; i < MAX_ASTEROIDS; i++) {
         if (asteroids[i].active) {
             asteroids[i].position.y += asteroids[i].speed;
@@ -111,8 +114,11 @@ void UpdateAstroDodge(void) {
                 if (asteroids[j].active) {
                     Rectangle asteroidRect = { asteroids[j].position.x, asteroids[j].position.y, 30, 30 };
                     if (CheckCollisionCircleRec(bullets[i].position, 5, asteroidRect)) {
-                        asteroids[j].active = false;
+                        asteroids[j].position = (Vector2){ rand() % SCREEN_WIDTH, (float)(-(rand() % 600)) };
+                        asteroids[j].speed = 5 + rand() % 2;
+                        asteroids[j].active = true;
                         bullets[i].active = false;
+                        score+=20;  
                         break;
                     }
                 }
@@ -133,8 +139,8 @@ void DrawAstroDodge(void) {
     }
 
     DrawTexturePro(shipTexture, (Rectangle){ 0, 0, shipTexture.width, shipTexture.height },
-                   (Rectangle){ player.x, player.y, player.width, player.height },
-                   (Vector2){ 0, 0 }, 0.0f, WHITE);
+    (Rectangle){ player.x, player.y, player.width, player.height },
+    (Vector2){ 0, 0 }, 0.0f, WHITE);
 
     for (int i = 0; i < MAX_BULLETS; i++) {
         if (bullets[i].active)
@@ -148,6 +154,10 @@ void DrawAstroDodge(void) {
 
     DrawText(TextFormat("Tempo: %.2f", survivalTime), 10, 10, 20, WHITE);
     DrawText(TextFormat("Melhor: %.2f", bestTime), 10, 40, 20, YELLOW);
+    const int fontSize = 20;
+    const int spacing = 30;
+    DrawText(TextFormat("Score: %d", score), SCREEN_WIDTH - 150, 10, fontSize, YELLOW);
+    DrawText(TextFormat("Munição: %d", ammo), SCREEN_WIDTH - 150, 10 + spacing, fontSize, WHITE);
 
     if (gameOver) {
         DrawText("Game Over!", SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT/2 - 20, 40, YELLOW);

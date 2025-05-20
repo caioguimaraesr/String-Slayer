@@ -5,7 +5,7 @@
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 600
-#define MAX_ASTEROIDS 18
+#define MAX_ASTEROIDS 15
 #define MAX_BULLETS 50
 
 typedef struct Bullet {
