@@ -22,11 +22,17 @@ static Wall walls[MAX_WALLS];
 static float wallSpacing = 300;
 static float wallSpeed = 200;
 static int pipePassed;
+static Sound pointSound;
+static Sound gameOverSound;
+static Sound flapSound;
 
 void AvoidInit(void) {
     background = LoadTexture("assets/images/Fundo-avoid.jpg");
     birdTexture = LoadTexture("assets/images/Pombo.png");
     pipeTexture = LoadTexture("assets/images/pipe.png");
+    pointSound = LoadSound("assets/music/Correct-Avoid.wav");
+    gameOverSound = LoadSound("assets/music/GameOver-Avoid.wav");
+    flapSound = LoadSound("assets/music/Fly-Avoid.wav");
 
     avoidPlayer = (Rectangle){ 100, SCREEN_HEIGHT/2, 34, 24 };
     avoidVelocity = 0;
@@ -53,7 +59,10 @@ void AvoidUpdate(void) {
         return;
     }
 
-    if (IsKeyPressed(KEY_SPACE)) avoidVelocity = avoidJumpForce;
+    if (IsKeyPressed(KEY_SPACE)) {
+        avoidVelocity = avoidJumpForce;
+        PlaySound(flapSound);
+    }
 
     avoidVelocity += avoidGravity * GetFrameTime();
     avoidPlayer.y += avoidVelocity * GetFrameTime();
@@ -67,6 +76,7 @@ void AvoidUpdate(void) {
         if (!walls[i].passed && (walls[i].x + WALL_WIDTH) < avoidPlayer.x) {
             pipePassed++;
             walls[i].passed = true;
+            PlaySound(pointSound);
         }
 
         if (walls[i].x + WALL_WIDTH < 0) {
@@ -88,6 +98,7 @@ void AvoidUpdate(void) {
             avoidPlayer.y < 0 || avoidPlayer.y + avoidPlayer.height > SCREEN_HEIGHT) {
             avoidGameOver = true;
             if (pipePassed > pipePassedRecord) pipePassedRecord = pipePassed;
+            PlaySound(gameOverSound);
         }
     }
 }
@@ -133,7 +144,7 @@ void AvoidDraw(void) {
         }
     } else {
         DrawText("Game Over!", SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT/2 - 30, 40, RED);
-        DrawText("Pressione ENTER para voltar ao menu", SCREEN_WIDTH/2 - 180, SCREEN_HEIGHT/2 + 10, 20, LIGHTGRAY);
+        DrawText("Pressione ENTER para voltar ao menu", SCREEN_WIDTH/2 - 180, SCREEN_HEIGHT/2 + 10, 20, WHITE);
     }
 }
 
@@ -148,5 +159,8 @@ int AvoidRecord(void) {
 void AvoidUnload(void) {
     UnloadTexture(background);
     UnloadTexture(birdTexture);
+    UnloadSound(pointSound);
+    UnloadSound(flapSound);
+    UnloadSound(gameOverSound);
     UnloadTexture(pipeTexture);
 }

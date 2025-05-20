@@ -24,6 +24,9 @@ int asteroidsToActivate = 5;
 Bullet bullets[MAX_BULLETS];
 float bulletSpeed = 500.0f;
 
+// == PONG ==
+bool pongMusicStarted = false;
+
 GameState currentState = MENU;
 
 
@@ -40,12 +43,13 @@ int main(void) {
     InitAudioDevice();
     srand(time(NULL));
 
-    Music music = LoadMusicStream("assets/music/musica-errada.wav");
+    Music music = LoadMusicStream("assets/music/music.wav");
     Music astroMusic = LoadMusicStream("assets/music/astro.ogg");
+    Music musicPong = LoadMusicStream("assets/music/Pong-Music.wav");
+
     Sound pongBar = LoadSound("assets/music/Barra.wav");
     Sound pongPoint = LoadSound("assets/music/pontoPong.wav");
     Sound pongRebound = LoadSound("assets/music/Rebound.wav");
-
 
     PlayMusicStream(astroMusic);
     SetMusicVolume(astroMusic,0.3f);
@@ -71,6 +75,7 @@ int main(void) {
 
             if (!IsMusicStreamPlaying(music)) PlayMusicStream(music);
             astroMusicPlaying = false;
+            pongMusicStarted = false;
         } 
         else if (currentState == ASTRO_DODGE) {
             UpdateMusicStream(astroMusic);
@@ -81,8 +86,17 @@ int main(void) {
                 astroMusicPlaying = true;
             }
         }
+        else if (currentState == PONG) {
+            UpdateMusicStream(musicPong);
+
+            if (!pongMusicStarted) {
+                StopMusicStream(music);
+                StopMusicStream(astroMusic);
+                PlayMusicStream(musicPong);
+                pongMusicStarted = true;
+            }
+        }
         BeginDrawing();
-        UpdateMusicStream(music);
 
         if (currentState == MENU) {
             Rectangle source = { 0, 0, (float)menuBackground.width, (float)menuBackground.height };
@@ -221,10 +235,12 @@ int main(void) {
             static float bestTime = 0.0f;
             static float startCountdown;
             static bool gameStarted;
+            static Sound shootSound;
 
             if (!astroInitialized) {
                 player = (Rectangle){ SCREEN_WIDTH/2.0f - 20, SCREEN_HEIGHT - 60, 40, 40 };
                 playerSpeed = 10.0f;
+                shootSound = LoadSound("assets/music/Tiro-Astro.wav");
                 for (int i = 0; i < MAX_ASTEROIDS; i++) {
                     asteroids[i].position = (Vector2){ rand() % SCREEN_WIDTH, (float)(-(rand() % 600)) };
                     asteroids[i].speed = 5 + rand() % 2; // Velocidade dos asteroides
@@ -237,7 +253,7 @@ int main(void) {
 
                 gameOver = false;
                 survivalTime = 0.0f;
-                hitSound = LoadSound("assets/hit.wav");
+                hitSound = LoadSound("assets/music/Hit-Astro.wav");
                 astroInitialized = true;
                 startCountdown = 5.0f;
                 gameStarted = false;
@@ -277,6 +293,7 @@ int main(void) {
                                 player.x + player.width / 2,
                                 player.y
                             };
+                            PlaySound(shootSound);
                             break;
                         }
                     }
@@ -351,7 +368,8 @@ int main(void) {
                 if (IsKeyPressed(KEY_ENTER)) {
                     astroInitialized = false;
                     UnloadSound(hitSound);
-                    currentState = MENU;
+                    UnloadSound(shootSound);
+                    currentState = GAMES_MENU;
                 }
             }
 
@@ -380,7 +398,7 @@ int main(void) {
             if (AvoidIsGameOver() && IsKeyPressed(KEY_ENTER)) {
                 AvoidUnload();
                 avoidInitialized = false;
-                currentState = MENU;
+                currentState = GAMES_MENU;
             }
         }
         else if (currentState == COMMANDS) {
@@ -430,6 +448,7 @@ int main(void) {
     // Music
     UnloadMusicStream(astroMusic);
     UnloadMusicStream(music);
+    UnloadMusicStream(musicPong);
     UnloadSound(pongPoint);
     UnloadSound(pongBar);
     UnloadSound(pongRebound);
@@ -437,5 +456,5 @@ int main(void) {
     FreeBallHistory(history);
     CloseWindow();
     return 0;
-    }
+}
 

@@ -175,7 +175,7 @@ void HandleGameEnd() {
         const char *msg = (score1 > score2) ? "Jogador 1 Venceu!" : (score2 > score1) ? "Jogador 2 Venceu!" : "Empate!";
         DrawText(msg, SCREEN_WIDTH/2 - MeasureText(msg, 40)/2, SCREEN_HEIGHT/2 - 20, 40, YELLOW);
         DrawText("Pressione ENTER para voltar ao menu", SCREEN_WIDTH/2 - 180, SCREEN_HEIGHT/2 + 30, 20, GRAY);
-        if (IsKeyPressed(KEY_ENTER)) currentState = MENU;
+        if (IsKeyPressed(KEY_ENTER)) currentState = GAMES_MENU;
     }
 }
 
