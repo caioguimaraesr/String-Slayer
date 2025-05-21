@@ -147,7 +147,7 @@ int main(void) {
             const char* playText = menuItems[0];
             int playTextWidth = MeasureText(playText, playFontSize);
             int playX = SCREEN_WIDTH / 2 - playTextWidth / 2;
-            int playY = 420;
+            int playY = 420 - 50;
 
             int padding = 30;
             DrawRectangleRounded((Rectangle){
@@ -162,7 +162,7 @@ int main(void) {
                 Color color = (i == selectedOption) ? YELLOW : LIGHTGRAY;
                 int textWidth = MeasureText(menuItems[i], fontSize);
                 int x = SCREEN_WIDTH / 2 - textWidth / 2;
-                int y = 500 + (i - 1) * 35;
+                int y = 500 - 50 + (i - 1) * 35;
                 DrawText(menuItems[i], x, y, fontSize, color);
             }
         }
