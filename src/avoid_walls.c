@@ -1,10 +1,14 @@
 #include "avoid_walls.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include "score.h"
+#include "game.h"
+#include "raylib.h"
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 600
 
+extern GameState currentState;
 static Texture2D background;
 static Texture2D birdTexture;
 static Texture2D pipeTexture;
@@ -46,7 +50,15 @@ void AvoidInit(void) {
 }
 
 void AvoidUpdate(void) {
-    if (avoidGameOver) return;
+    if (avoidGameOver) {
+        // Adicione esta verificação para quando o jogador pressionar ENTER
+        if (IsKeyPressed(KEY_ENTER)) {
+            atualizarScore(2, GetAvoidScore()); // 2 para AVOID WALLS
+            salvarScores("scores.dat");
+            currentState = GAMES_MENU; // Isso precisa ser acessível, pode precisar de extern
+        }
+        return;
+    }
 
     if (!avoidStarted) {
         avoidCountdown -= GetFrameTime();
@@ -155,6 +167,10 @@ bool AvoidIsGameOver(void) {
 
 int AvoidRecord(void) {
     return pipePassedRecord;
+}
+
+int GetAvoidScore(void) {
+    return pipePassed * 100; 
 }
 
 void AvoidUnload(void) {

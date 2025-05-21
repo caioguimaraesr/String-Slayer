@@ -1,4 +1,7 @@
 #include "astro_dodge.h"
+#include "game.h"
+#include "score.h"
+#include "raylib.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -85,6 +88,8 @@ void UpdateAstroDodge(void) {
 
     if (gameOver) {
         if (IsKeyPressed(KEY_ENTER)) {
+            atualizarScore(1, score); // 1 para ASTRO DODGE
+            salvarScores("scores.dat");
             returnToMenu = true;
         }
         return;

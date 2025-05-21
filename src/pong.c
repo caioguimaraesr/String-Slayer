@@ -1,5 +1,6 @@
 #include "pong.h"
 #include <stdlib.h>
+#include "score.h"
 #include <stdio.h>
 #include <game.h>
 
@@ -175,7 +176,14 @@ void HandleGameEnd() {
         const char *msg = (score1 > score2) ? "Jogador 1 Venceu!" : (score2 > score1) ? "Jogador 2 Venceu!" : "Empate!";
         DrawText(msg, SCREEN_WIDTH/2 - MeasureText(msg, 40)/2, SCREEN_HEIGHT/2 - 20, 40, YELLOW);
         DrawText("Pressione ENTER para voltar ao menu", SCREEN_WIDTH/2 - 180, SCREEN_HEIGHT/2 + 30, 20, GRAY);
-        if (IsKeyPressed(KEY_ENTER)) currentState = GAMES_MENU;
+        
+        if (IsKeyPressed(KEY_ENTER)) {
+            // Adicione estas linhas:
+            int winningScore = (score1 > score2) ? score1 : score2;
+            atualizarScore(0, winningScore); // 0 para PONG
+            salvarScores("scores.dat");
+            currentState = GAMES_MENU;
+        }
     }
 }
 

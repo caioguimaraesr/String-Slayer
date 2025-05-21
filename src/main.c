@@ -3,7 +3,9 @@
 #include "astro_dodge.h"
 #include "avoid_walls.h"
 #include "game.h"
+#include "score.h"
 #include <stdlib.h>
+#include <stdio.h>
 #include <time.h>
 
 // == AVOID THE WALLS ==
@@ -32,6 +34,7 @@ GameState currentState = MENU;
 
 int main(void) {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "String Slayer");
+    carregarScores("scores.dat");
     Texture2D shipTexture = LoadTexture("assets/images/nave_espacial.png");
     Texture2D asteroidTexture = LoadTexture("assets/images/asteroid.png");
     Texture2D menuBackground = LoadTexture("assets/images/String Slayer - Background.png");
@@ -43,25 +46,26 @@ int main(void) {
     InitAudioDevice();
     srand(time(NULL));
 
-    Music music = LoadMusicStream("assets/music/music.wav");
+    Music music = LoadMusicStream("assets/music/music.ogg");
     Music astroMusic = LoadMusicStream("assets/music/astro.ogg");
-    Music musicPong = LoadMusicStream("assets/music/Pong-Music.wav");
+    Music musicPong = LoadMusicStream("assets/music/Pong-Music.ogg");
 
     Sound pongBar = LoadSound("assets/music/Barra.wav");
     Sound pongPoint = LoadSound("assets/music/pontoPong.wav");
     Sound pongRebound = LoadSound("assets/music/Rebound.wav");
 
     PlayMusicStream(astroMusic);
+    SetMusicVolume(musicPong, 0.2f);
     SetMusicVolume(astroMusic,0.3f);
-    SetSoundVolume(pongPoint,0.05f);
-    SetSoundVolume(pongBar,0.05f);
+    SetSoundVolume(pongPoint,0.4f);
+    SetSoundVolume(pongBar,0.4f);
     SetSoundVolume(pongRebound,0.05f);
 
 
     SetTargetFPS(60);
     
     bool astroMusicPlaying = false;
-    const char *menuItems[] = { "JOGAR", "COMANDOS", "SAIR" };
+    const char *menuItems[] = { "JOGAR", "COMANDOS", "SCORES", "SAIR" };
     int mainMenuItemsCount = sizeof(menuItems) / sizeof(menuItems[0]);
 
     const char *gameMenuItems[] = { "PONG", "ASTRO DODGE", "AVOID THE WALLS", "VOLTAR" };
@@ -71,7 +75,7 @@ int main(void) {
     
     while (!WindowShouldClose()) {
         // Atualizar a música apropriada
-        if (currentState == MENU) {
+        if (currentState == MENU || currentState == GAMES_MENU) {
             UpdateMusicStream(music);
 
             if (!IsMusicStreamPlaying(music)) PlayMusicStream(music);
@@ -88,13 +92,17 @@ int main(void) {
             }
         }
         else if (currentState == PONG) {
-            UpdateMusicStream(musicPong);
+            HandlePointScored();
 
-            if (!pongMusicStarted) {
+            if (pongCountdown <= 0.0f && !pongMusicStarted) {
                 StopMusicStream(music);
                 StopMusicStream(astroMusic);
                 PlayMusicStream(musicPong);
                 pongMusicStarted = true;
+            }
+            
+            if (pongMusicStarted) {
+                UpdateMusicStream(musicPong);
             }
         }
         BeginDrawing();
@@ -129,6 +137,8 @@ int main(void) {
                 } else if (selectedOption == 1) {
                     currentState = COMMANDS;
                 } else if (selectedOption == 2) {
+                    currentState = SCORES_MENU;
+                } else if (selectedOption == 3) {
                     break;
                 }
             }
@@ -214,6 +224,35 @@ int main(void) {
                 }
             }
         }
+        else if (currentState == SCORES_MENU) {
+            ClearBackground(BLACK);
+            
+            // Título
+            DrawText("TOP 3 SCORES", SCREEN_WIDTH/2 - MeasureText("TOP 3 SCORES", 40)/2, 50, 40, YELLOW);
+            
+            // Scores para cada minijogo
+            const char* minijogoNomes[] = {"PONG", "ASTRO DODGE", "AVOID THE WALLS"};
+            int y = 120;
+            
+            for (int i = 0; i < MAX_MINIJOGOS; i++) {
+                DrawText(minijogoNomes[i], SCREEN_WIDTH/2 - MeasureText(minijogoNomes[i], 30)/2, y, 30, WHITE);
+                
+                // Mostra apenas os top 3 (ou menos se não houver)
+                for (int j = 0; j < highScores[i].count && j < 3; j++) {
+                    char scoreText[50];
+                    sprintf(scoreText, "%dº - %d", j+1, highScores[i].scores[j]);
+                    DrawText(scoreText, SCREEN_WIDTH/2 - MeasureText(scoreText, 25)/2, y + 40 + (j * 30), 25, LIGHTGRAY);
+                }
+                
+                y += 150; // Reduzi o espaçamento entre jogos
+            }
+            
+            DrawText("Pressione ENTER para voltar", SCREEN_WIDTH/2 - MeasureText("Pressione ENTER para voltar", 20)/2, SCREEN_HEIGHT - 50, 20, GRAY);
+            
+            if (IsKeyPressed(KEY_ENTER)) {
+                currentState = MENU;
+            }
+        }
 
         // Inicio do Jogo Pong
         else if (currentState == PONG) {
@@ -229,26 +268,24 @@ int main(void) {
             static bool astroInitialized = false;
 
         
-        if (!astroInitialized) {
-            InitAstroDodge(shipTexture, asteroidTexture);  // certifique-se de passar as texturas certas
-            astroInitialized = true;
-        }
+            if (!astroInitialized) {
+                InitAstroDodge(shipTexture, asteroidTexture);  // certifique-se de passar as texturas certas
+                astroInitialized = true;
+            }
 
-        UpdateAstroDodge();
-        DrawAstroDodge();
+            UpdateAstroDodge();
+            DrawAstroDodge();
 
-        if (AstroWantsToReturnToMenu()) {
-            UnloadAstroDodge();
-            astroInitialized = false;  // resetar para permitir reinicialização depois
-            currentState = GAMES_MENU;
-        }
+            if (AstroWantsToReturnToMenu()) {
+                UnloadAstroDodge();
+                astroInitialized = false;  // resetar para permitir reinicialização depois
+                currentState = GAMES_MENU;
+            }
 
-        if (IsKeyPressed(KEY_R)) {
-            RestartAstroDodge();
-        }
-}
-
-
+            if (IsKeyPressed(KEY_R)) {
+                RestartAstroDodge();
+            }
+        }   
         // Inicio do Jogo Avoid Walls
         else if (currentState == AVOID_WALLS) {
             if (!avoidInitialized) {
@@ -308,13 +345,13 @@ int main(void) {
     UnloadTexture(menuGameBackground);
 
     // Music
-    UnloadMusicStream(astroMusic);
+    CloseAudioDevice();
     UnloadMusicStream(music);
+    UnloadMusicStream(astroMusic);
     UnloadMusicStream(musicPong);
     UnloadSound(pongPoint);
     UnloadSound(pongBar);
     UnloadSound(pongRebound);
-    CloseAudioDevice();
     FreeBallHistory(history);
     CloseWindow();
     return 0;

@@ -15,6 +15,7 @@ typedef enum GameState {
     ASTRO_DODGE,
     AVOID_WALLS,
     COMMANDS,
+    SCORES_MENU
 } GameState;
 
 extern GameState currentState;

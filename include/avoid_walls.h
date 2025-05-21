@@ -8,6 +8,7 @@
 #define WALL_GAP 200
 #define MAX_WALLS 5
 #define MIN_SPACING 250
+
 // === ESTRUTURAS AVOID WALLS ===
 typedef struct {
     float x;
@@ -15,6 +16,7 @@ typedef struct {
     bool passed;
 } Wall;
 
+int GetAvoidScore(void);
 void AvoidInit(void);
 void AvoidUpdate(void);
 void AvoidDraw(void);
