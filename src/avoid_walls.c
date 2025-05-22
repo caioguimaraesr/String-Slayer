@@ -55,7 +55,7 @@ void AvoidUpdate(void) {
         if (IsKeyPressed(KEY_ENTER)) {
             atualizarScore(2, GetAvoidScore()); // 2 para AVOID WALLS
             salvarScores("scores.dat");
-            currentState = GAMES_MENU; // Isso precisa ser acessível, pode precisar de extern
+            currentState = GAMES_MENU; 
         }
         return;
     }
@@ -152,8 +152,7 @@ void AvoidDraw(void) {
             }
 
             DrawTextureEx(birdTexture, (Vector2){avoidPlayer.x, avoidPlayer.y}, 0.0f, 0.3f, WHITE);
-            DrawText(TextFormat("Pontuação: %d", pipePassed), 20, 20, 20, WHITE);
-            DrawText(TextFormat("Melhor: %d", pipePassedRecord), 20, 50, 20, YELLOW);
+            DrawText(TextFormat("Pontuação: %d", pipePassed), 20, 20, 20, YELLOW);
         }
     } else {
         DrawText("Game Over!", SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT/2 - 30, 40, RED);
@@ -170,7 +169,7 @@ int AvoidRecord(void) {
 }
 
 int GetAvoidScore(void) {
-    return pipePassed * 100; 
+    return pipePassed; 
 }
 
 void AvoidUnload(void) {
