@@ -214,7 +214,7 @@ void UpdateAstroDodge(void) {
 
     }
 
-
+    
 void DrawAstroDodge(void) {
     ClearBackground(BLACK);
     if (!gameStarted) {
