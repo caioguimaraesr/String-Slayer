@@ -17,6 +17,7 @@ static float avoidVelocity = 0;
 static float avoidGravity = 500;
 static float avoidJumpForce = -250;
 static int pipePassedRecord = 0;
+static int lastPipeCheckpoint = 0;
 static bool avoidGameOver = false;
 static bool avoidStarted = false;
 static float avoidCountdown = 3.0f;
@@ -35,7 +36,7 @@ void AvoidInit(void) {
     pointSound = LoadSound("assets/music/Correct-Avoid.wav");
     gameOverSound = LoadSound("assets/music/GameOver-Avoid.wav");
     flapSound = LoadSound("assets/music/Fly-Avoid.wav");
-
+    wallSpeed = 200;
     avoidPlayer = (Rectangle){ 100, SCREEN_HEIGHT/2, 34, 24 };
     avoidVelocity = 0;
     avoidGameOver = false;
@@ -81,7 +82,7 @@ void AvoidUpdate(void) {
     for (int i = 0; i < MAX_WALLS; i++) {
         walls[i].x -= wallSpeed * GetFrameTime();
 
-        #define MIN_SPACING 250
+        #define MIN_SPACING 300
 
       
         if (!walls[i].passed && (walls[i].x + WALL_WIDTH) < avoidPlayer.x) {
@@ -89,6 +90,12 @@ void AvoidUpdate(void) {
             walls[i].passed = true;
             PlaySound(pointSound);
             SetSoundVolume(pointSound,0.05f);
+        }
+        //funcao nova Caio        
+        if (pipePassed - lastPipeCheckpoint >= 5) { //aumentando em cada 5 canos
+            wallSpeed += 15;
+            if (wallSpeed > 500) wallSpeed = 500; //velocidade maxima = 500
+            lastPipeCheckpoint = pipePassed;
         }
 
         if (walls[i].x + WALL_WIDTH < 0) {

@@ -9,6 +9,7 @@
 #include <time.h>
 #include <commands.h>
 
+
 // == AVOID THE WALLS ==
 Rectangle avoidPlayer; 
 float avoidVelocity = 0;
@@ -56,7 +57,7 @@ int main(void) {
 
     SetMusicVolume(music,0.04f);
     PlayMusicStream(astroMusic);
-    SetMusicVolume(musicPong, 0.2f);
+    SetMusicVolume(musicPong, 0.045f);
     SetMusicVolume(astroMusic,0.3f);
     SetSoundVolume(pongPoint,0.4f);
     SetSoundVolume(pongBar,0.4f);
@@ -314,14 +315,12 @@ int main(void) {
         EndDrawing();
     }
 
-    // Images
     UnloadTexture(pipeTexture);
     UnloadTexture(background);
     UnloadTexture(asteroidTexture);
     UnloadTexture(shipTexture);
     UnloadTexture(menuGameBackground);
 
-    // Music
     CloseAudioDevice();
     UnloadMusicStream(music);
     UnloadMusicStream(astroMusic);
