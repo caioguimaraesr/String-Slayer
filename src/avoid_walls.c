@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "score.h"
+#include <string.h>
 #include "game.h"
 #include "raylib.h"
 
@@ -29,6 +30,10 @@ static Sound pointSound;
 static Sound gameOverSound;
 static Sound flapSound;
 
+static char playerName[MAX_NAME_LENGTH] = {0};
+static bool nameInputActive = false;
+static int nameLetterCount = 0;
+
 void AvoidInit(void) {
     background = LoadTexture("assets/images/Fundo-avoid.jpg");
     birdTexture = LoadTexture("assets/images/Pombo.png");
@@ -42,6 +47,9 @@ void AvoidInit(void) {
     avoidGameOver = false;
     avoidStarted = false;
     avoidCountdown = 3.0f;
+    nameInputActive = false;
+    memset(playerName, 0, MAX_NAME_LENGTH);
+    nameLetterCount = 0;
 
     for (int i = 0; i < MAX_WALLS; i++) {
         walls[i].x = SCREEN_WIDTH + i * wallSpacing;
@@ -52,11 +60,46 @@ void AvoidInit(void) {
 
 void AvoidUpdate(void) {
     if (avoidGameOver) {
-        // Adicione esta verificação para quando o jogador pressionar ENTER
-        if (IsKeyPressed(KEY_ENTER)) {
-            atualizarScore(2, GetAvoidScore()); // 2 para AVOID WALLS
-            salvarScores("scores.dat");
-            currentState = GAMES_MENU; 
+        bool highScore = false;
+        if (highScores[2].count < MAX_SCORES || pipePassed > highScores[2].entries[highScores[2].count-1].score) {
+            highScore = true;
+        }
+
+        if (highScore && !nameInputActive) {
+            nameInputActive = true;
+            memset(playerName, 0, MAX_NAME_LENGTH);
+            nameLetterCount = 0;
+        }
+
+        if (nameInputActive) {
+            int key = GetCharPressed();
+            while (key > 0) {
+                if ((key >= 32) && (key <= 125) && (nameLetterCount < MAX_NAME_LENGTH - 1)) {
+                    playerName[nameLetterCount] = (char)key;
+                    playerName[nameLetterCount + 1] = '\0';
+                    nameLetterCount++;
+                }
+                key = GetCharPressed();
+            }
+
+            if (IsKeyPressed(KEY_BACKSPACE)) {
+                nameLetterCount--;
+                if (nameLetterCount < 0) nameLetterCount = 0;
+                playerName[nameLetterCount] = '\0';
+            }
+
+            if (IsKeyPressed(KEY_ENTER) && nameLetterCount > 0) {
+                nameInputActive = false;
+                atualizarScore(2, pipePassed, playerName); // 2 para AVOID WALLS
+                salvarScores("scores.dat");
+                currentState = GAMES_MENU;
+            }
+        } else {
+            if (IsKeyPressed(KEY_ENTER)) {
+                atualizarScore(2, pipePassed, "Anonimo"); 
+                salvarScores("scores.dat");
+                currentState = GAMES_MENU;
+            }
         }
         return;
     }
@@ -82,16 +125,13 @@ void AvoidUpdate(void) {
     for (int i = 0; i < MAX_WALLS; i++) {
         walls[i].x -= wallSpeed * GetFrameTime();
 
-        #define MIN_SPACING 300
-
-      
         if (!walls[i].passed && (walls[i].x + WALL_WIDTH) < avoidPlayer.x) {
             pipePassed++;
             walls[i].passed = true;
             PlaySound(pointSound);
             SetSoundVolume(pointSound,0.05f);
         }
-        //funcao nova Caio        
+        
         if (pipePassed - lastPipeCheckpoint >= 5) { //aumentando em cada 5 canos
             wallSpeed += 15;
             if (wallSpeed > 500) wallSpeed = 500; //velocidade maxima = 500
@@ -162,8 +202,34 @@ void AvoidDraw(void) {
             DrawText(TextFormat("Pontuação: %d", pipePassed), 20, 20, 20, YELLOW);
         }
     } else {
-        DrawText("Game Over!", SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT/2 - 30, 40, RED);
-        DrawText("Pressione ENTER para voltar ao menu", SCREEN_WIDTH/2 - 180, SCREEN_HEIGHT/2 + 10, 20, WHITE);
+        DrawRectangle(0, SCREEN_HEIGHT/2 - 100, SCREEN_WIDTH, 250, Fade(BLACK, 0.5f));
+        DrawRectangleLines(0, SCREEN_HEIGHT/2 - 100, SCREEN_WIDTH, 250, GOLD);
+
+        DrawText("GAME OVER", SCREEN_WIDTH/2 - MeasureText("GAME OVER", 60)/2, SCREEN_HEIGHT/2 - 70, 60, RED);
+        
+        DrawText(TextFormat("Pontuação: %d", pipePassed), SCREEN_WIDTH/2 - 90, SCREEN_HEIGHT/2, 30, WHITE);
+
+        bool highScore = false;
+        if (highScores[2].count < MAX_SCORES || pipePassed > highScores[2].entries[highScores[2].count-1].score) {
+            highScore = true;
+        }
+
+        if (highScore) {
+            if (nameInputActive) {
+                DrawText("NOVO HIGH SCORE!", SCREEN_WIDTH/2 - MeasureText("NOVO HIGH SCORE!", 30)/2, SCREEN_HEIGHT/2 + 40, 30, GOLD);
+
+                DrawText("Digite seu nome:", SCREEN_WIDTH/2 - MeasureText("Digite seu nome:", 20)/2, SCREEN_HEIGHT/2 + 80, 20, WHITE);
+                DrawRectangle(SCREEN_WIDTH/2 - 150, SCREEN_HEIGHT/2 + 110, 300, 40, Fade(WHITE, 0.3f));
+                DrawRectangleLines(SCREEN_WIDTH/2 - 150, SCREEN_HEIGHT/2 + 110, 300, 40, GOLD);
+                DrawText(playerName, SCREEN_WIDTH/2 - MeasureText(playerName, 25)/2, SCREEN_HEIGHT/2 + 120, 25, WHITE);
+                
+                DrawText("Pressione ENTER para confirmar", SCREEN_WIDTH/2 - MeasureText("Pressione ENTER para confirmar", 20)/2, SCREEN_HEIGHT/2 + 170, 20, WHITE);
+            }
+        } else {
+            DrawText("Pressione ENTER para voltar ao menu", 
+                    SCREEN_WIDTH/2 - MeasureText("Pressione ENTER para voltar ao menu", 20)/2, 
+                    SCREEN_HEIGHT/2 + 50, 20, WHITE);
+        }
     }
 }
 

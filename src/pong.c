@@ -3,6 +3,7 @@
 #include "score.h"
 #include <stdio.h>
 #include <game.h>
+#include <string.h>
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 600
@@ -27,6 +28,9 @@ bool pointScored = false;
 float pointDelay = 0.0f;
 bool rebound = false;
 bool barHit = false;
+static char playerName[MAX_NAME_LENGTH] = {0};
+static bool nameInputActive = false;
+static int nameLetterCount = 0;
 
 
 void HandlePointScored() {
@@ -175,14 +179,57 @@ void HandleGameEnd() {
     if (gameEnded) {
         const char *msg = (score1 > score2) ? "Jogador 1 Venceu!" : (score2 > score1) ? "Jogador 2 Venceu!" : "Empate!";
         DrawText(msg, SCREEN_WIDTH/2 - MeasureText(msg, 40)/2, SCREEN_HEIGHT/2 - 20, 40, YELLOW);
-        DrawText("Pressione ENTER para voltar ao menu", SCREEN_WIDTH/2 - 180, SCREEN_HEIGHT/2 + 30, 20, GRAY);
         
-        if (IsKeyPressed(KEY_ENTER)) {
-            // Adicione estas linhas:
-            int winningScore = (score1 > score2) ? score1 : score2;
-            atualizarScore(0, winningScore); // 0 para PONG
-            salvarScores("scores.dat");
-            currentState = GAMES_MENU;
+        int winningScore = (score1 > score2) ? score1 : score2;
+        
+        // Verifica se é um high score
+        bool highScore = false;
+        if (highScores[0].count < MAX_SCORES || winningScore > highScores[0].entries[highScores[0].count-1].score) {
+            highScore = true;
+        }
+
+        if (highScore && !nameInputActive) {
+            nameInputActive = true;
+            memset(playerName, 0, MAX_NAME_LENGTH);
+            nameLetterCount = 0;
+        }
+
+        if (nameInputActive) {
+            // Captura entrada do teclado para o nome
+            int key = GetCharPressed();
+            while (key > 0) {
+                if ((key >= 32) && (key <= 125) && (nameLetterCount < MAX_NAME_LENGTH - 1)) {
+                    playerName[nameLetterCount] = (char)key;
+                    playerName[nameLetterCount + 1] = '\0';
+                    nameLetterCount++;
+                }
+                key = GetCharPressed();
+            }
+
+            if (IsKeyPressed(KEY_BACKSPACE)) {
+                nameLetterCount--;
+                if (nameLetterCount < 0) nameLetterCount = 0;
+                playerName[nameLetterCount] = '\0';
+            }
+
+            DrawText("Novo High Score! Digite seu nome:", SCREEN_WIDTH/2 - 200, SCREEN_HEIGHT/2 + 20, 20, GREEN);
+            DrawText(playerName, SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT/2 + 50, 30, WHITE);
+            DrawText("Pressione ENTER para confirmar", SCREEN_WIDTH/2 - 180, SCREEN_HEIGHT/2 + 90, 20, GRAY);
+
+            if (IsKeyPressed(KEY_ENTER) && nameLetterCount > 0) {
+                nameInputActive = false;
+                atualizarScore(0, winningScore, playerName); // 0 para PONG
+                salvarScores("scores.dat");
+                currentState = GAMES_MENU;
+            }
+        } else {
+            DrawText("Pressione ENTER para voltar ao menu", SCREEN_WIDTH/2 - 180, SCREEN_HEIGHT/2 + 30, 20, GRAY);
+            
+            if (IsKeyPressed(KEY_ENTER)) {
+                atualizarScore(0, winningScore, "Anonimo");
+                salvarScores("scores.dat");
+                currentState = GAMES_MENU;
+            }
         }
     }
 }
@@ -230,4 +277,10 @@ void AppendBallPosition(BallPositionNode **head, Vector2 pos, int *count) {
         free(temp);
         (*count)--;
     }
+}
+
+void ResetPongGame() {
+    nameInputActive = false;
+    memset(playerName, 0, MAX_NAME_LENGTH);
+    nameLetterCount = 0;
 }

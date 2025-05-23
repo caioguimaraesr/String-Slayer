@@ -6,6 +6,7 @@
 #include "score.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <time.h>
 #include <commands.h>
 
@@ -241,8 +242,8 @@ int main(void) {
                 
                 // Mostra apenas os top 3 (ou menos se não houver)
                 for (int j = 0; j < highScores[i].count && j < 3; j++) {
-                    char scoreText[50];
-                    sprintf(scoreText, "%dº - %d", j+1, highScores[i].scores[j]);
+                    char scoreText[100];
+                    sprintf(scoreText, "%dº - %s: %d", j+1, highScores[i].entries[j].name, highScores[i].entries[j].score);
                     DrawText(scoreText, SCREEN_WIDTH/2 - MeasureText(scoreText, 25)/2, y + 40 + (j * 30), 25, LIGHTGRAY);
                 }
                 
@@ -271,7 +272,7 @@ int main(void) {
 
         
             if (!astroInitialized) {
-                InitAstroDodge(shipTexture, asteroidTexture);  // certifique-se de passar as texturas certas
+                InitAstroDodge(shipTexture, asteroidTexture); 
                 astroInitialized = true;
             }
 
@@ -280,14 +281,11 @@ int main(void) {
 
             if (AstroWantsToReturnToMenu()) {
                 UnloadAstroDodge();
-                astroInitialized = false;  // resetar para permitir reinicialização depois
+                astroInitialized = false;
                 currentState = GAMES_MENU;
             }
-
-            if (IsKeyPressed(KEY_R)) {
-                RestartAstroDodge();
-            }
         }   
+
         // Inicio do Jogo Avoid Walls
         else if (currentState == AVOID_WALLS) {
             if (!avoidInitialized) {

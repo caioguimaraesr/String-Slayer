@@ -2,6 +2,7 @@
 #include "game.h"
 #include "score.h"
 #include "raylib.h"
+#include <string.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -32,6 +33,10 @@ static AmmoDrop ammoDrops[MAX_AMMO_DROPS];
 static float ammoDropTimer = 0.0f; 
 static const float bulletSpeed = 500.0f;
 static Diamond diamonds[MAX_DIAMONDS];
+
+static char playerName[MAX_NAME_LENGTH] = {0};
+static bool nameInputActive = false;
+static int nameLetterCount = 0;
 
 void InitAstroDodge(Texture2D shipTex, Texture2D asteroidTex) {
     shipTexture = shipTex;
@@ -87,10 +92,48 @@ void UpdateAstroDodge(void) {
     }
 
     if (gameOver) {
-        if (IsKeyPressed(KEY_ENTER)) {
-            atualizarScore(1, score); // 1 para ASTRO DODGE
-            salvarScores("scores.dat");
-            returnToMenu = true;
+        // Verifica se o score é alto o suficiente para entrar no ranking
+        bool highScore = false;
+        if (highScores[1].count < MAX_SCORES || score > highScores[1].entries[highScores[1].count-1].score) {
+            highScore = true;
+        }
+
+        if (highScore && !nameInputActive) {
+            nameInputActive = true;
+            memset(playerName, 0, MAX_NAME_LENGTH);
+            nameLetterCount = 0;
+        }
+
+        if (nameInputActive) {
+            // Captura entrada do teclado para o nome
+            int key = GetCharPressed();
+            while (key > 0) {
+                if ((key >= 32) && (key <= 125) && (nameLetterCount < MAX_NAME_LENGTH - 1)) {
+                    playerName[nameLetterCount] = (char)key;
+                    playerName[nameLetterCount + 1] = '\0';
+                    nameLetterCount++;
+                }
+                key = GetCharPressed();
+            }
+
+            if (IsKeyPressed(KEY_BACKSPACE)) {
+                nameLetterCount--;
+                if (nameLetterCount < 0) nameLetterCount = 0;
+                playerName[nameLetterCount] = '\0';
+            }
+
+            if (IsKeyPressed(KEY_ENTER) && nameLetterCount > 0) {
+                nameInputActive = false;
+                atualizarScore(1, score, playerName); // 1 para ASTRO DODGE
+                salvarScores("scores.dat");
+                returnToMenu = true;
+            }
+        } else {
+            if (IsKeyPressed(KEY_ENTER)) {
+                atualizarScore(1, score, "Anonimo"); // Se não for high score, usa "Anonimo"
+                salvarScores("scores.dat");
+                returnToMenu = true;
+            }
         }
         return;
     }
@@ -248,8 +291,34 @@ void DrawAstroDodge(void) {
     DrawText(TextFormat("Munição: %d", ammo), SCREEN_WIDTH - 150, 10 + spacing, fontSize, WHITE);
 
     if (gameOver) {
-        DrawText("Game Over!", SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT/2 - 20, 40, YELLOW);
-        DrawText("Pressione ENTER para voltar ao menu", SCREEN_WIDTH/2 - 180, SCREEN_HEIGHT/2 + 30, 20, GRAY);
+        DrawRectangle(0, SCREEN_HEIGHT/2 - 100, SCREEN_WIDTH, 250, Fade(BLACK, 0.5f));
+        DrawRectangleLines(0, SCREEN_HEIGHT/2 - 100, SCREEN_WIDTH, 250, GOLD); 
+
+        DrawText("GAME OVER", SCREEN_WIDTH/2 - MeasureText("GAME OVER", 60)/2, SCREEN_HEIGHT/2 - 70, 60, RED);
+        
+        DrawText(TextFormat("Pontuação: %d", score), SCREEN_WIDTH/2 - 90, SCREEN_HEIGHT/2, 30, WHITE);
+
+        bool highScore = false;
+        if (highScores[1].count < MAX_SCORES || score > highScores[1].entries[highScores[1].count - 1].score) {
+            highScore = true;
+        }
+
+        if (highScore) {
+            if (nameInputActive) {
+                DrawText("NOVO HIGH SCORE!", SCREEN_WIDTH/2 - MeasureText("NOVO HIGH SCORE!", 30)/2, SCREEN_HEIGHT/2 + 40, 30, GOLD);
+                
+                DrawText("Digite seu nome:", SCREEN_WIDTH/2 - MeasureText("Digite seu nome:", 20)/2, SCREEN_HEIGHT/2 + 80, 20, WHITE);
+                DrawRectangle(SCREEN_WIDTH/2 - 150, SCREEN_HEIGHT/2 + 110, 300, 40, Fade(WHITE, 0.3f));
+                DrawRectangleLines(SCREEN_WIDTH/2 - 150, SCREEN_HEIGHT/2 + 110, 300, 40, GOLD);
+                DrawText(playerName, SCREEN_WIDTH/2 - MeasureText(playerName, 25)/2, SCREEN_HEIGHT/2 + 120, 25, WHITE);
+                
+                DrawText("Pressione ENTER para confirmar", SCREEN_WIDTH/2 - MeasureText("Pressione ENTER para confirmar", 20)/2, SCREEN_HEIGHT/2 + 170, 20, WHITE);
+            }
+        } else {
+            DrawText("Pressione ENTER para voltar ao menu", 
+                    SCREEN_WIDTH/2 - MeasureText("Pressione ENTER para voltar ao menu", 20)/2, 
+                    SCREEN_HEIGHT/2 + 50, 20, WHITE);
+        }
     }
     for (int i = 0; i < MAX_AMMO_DROPS; i++) {
         if (ammoDrops[i].active) {
@@ -269,15 +338,6 @@ void DrawAstroDodge(void) {
     }    
 }
 
-void RestartAstroDodge(void) {
-    UnloadSound(hitSound);
-    UnloadSound(shootSound);
-    InitAstroDodge(shipTexture, asteroidTexture); 
-    UnloadTexture(ammoTexture);
-    UnloadTexture(diamondTexture);
-    UnloadTexture(diamond2Texture);
-}
-
 void UnloadAstroDodge(void) {
     UnloadSound(hitSound);
     UnloadSound(shootSound);
@@ -288,5 +348,5 @@ bool IsAstroGameOver(void) {
 }
 
 bool AstroWantsToReturnToMenu(void) {
-    return returnToMenu || IsKeyPressed(KEY_M);
+    return returnToMenu;
 }
