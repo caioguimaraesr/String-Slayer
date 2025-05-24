@@ -141,7 +141,9 @@ make clean
 🐤 Avoid the Walls — estilo Flappy Bird, teste seus reflexos!
 </p>
 
+<h2><strong> Demonstração do jogo </strong></h2> 
 
+[![**Stringslayer**](assets\images\StringSlayer.jpg)](https://youtu.be/JYtRvtClJTQ?si=ELyZO96sPUvDlrxI)
 <h1> 🎉 Obrigado por instalar o String Slayer! </h1>
 Esperamos que você se divirta jogando tanto quanto nós nos divertimos criando! ❤️ 
 Bom jogo!
