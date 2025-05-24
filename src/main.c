@@ -62,11 +62,11 @@ int main(void) {
     SetSoundVolume(menuSelect2, 0.2f);
     SetMusicVolume(music,0.04f);
     PlayMusicStream(astroMusic);
+    SetMusicVolume(astroMusic,0.2f);
     SetMusicVolume(musicPong, 0.045f);
-    SetMusicVolume(astroMusic,0.3f);
-    SetSoundVolume(pongPoint,0.4f);
-    SetSoundVolume(pongBar,0.4f);
-    SetSoundVolume(pongRebound,0.05f);
+    SetSoundVolume(pongPoint,0.1f);
+    SetSoundVolume(pongBar,0.3f);
+    SetSoundVolume(pongRebound,0.1f);
 
 
     SetTargetFPS(60);

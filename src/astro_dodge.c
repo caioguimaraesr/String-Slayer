@@ -58,8 +58,8 @@ void InitAstroDodge(Texture2D shipTex, Texture2D asteroidTex) {
     score = 0;
     hitSound = LoadSound("assets/music/Hit-Astro.wav");
     shootSound = LoadSound("assets/music/Tiro-Astro.wav");
-    SetSoundVolume(hitSound,0.3f);
-    SetSoundVolume(shootSound,0.3f);
+    SetSoundVolume(hitSound,0.15f);
+    SetSoundVolume(shootSound,0.15f);
 
     for (int i = 0; i < MAX_ASTEROIDS; i++) {
         asteroids[i].position = (Vector2){ rand() % SCREEN_WIDTH, (float)(-(rand() % 600)) };
@@ -73,7 +73,7 @@ void InitAstroDodge(Texture2D shipTex, Texture2D asteroidTex) {
     for (int i = 0; i < MAX_AMMO_DROPS; i++) {
         ammoDrops[i].active = false;
         ammoDrops[i].position = (Vector2){0, 0};
-        ammoDrops[i].speed = 6 + rand() % 2; 
+        ammoDrops[i].speed = 10 + rand() % 2; 
     }
     ammoDropTimer = 0.0f;
 
@@ -234,7 +234,7 @@ void UpdateAstroDodge(void) {
                 diamonds[i].active = true;
                 diamonds[i].position.x = rand() % (SCREEN_WIDTH - 30);
                 diamonds[i].position.y = -30;
-                diamonds[i].speed = 100 + rand() % 40;  
+                diamonds[i].speed = 200 + rand() % 40;  
                 diamonds[i].value = (rand() % 2 == 0) ? 1000 : 2500; 
                 break;
         }
@@ -296,7 +296,7 @@ void DrawAstroDodge(void) {
 
         DrawText("GAME OVER", SCREEN_WIDTH/2 - MeasureText("GAME OVER", 60)/2, SCREEN_HEIGHT/2 - 70, 60, RED);
         
-        DrawText(TextFormat("Pontuação: %d", score), SCREEN_WIDTH/2 - 90, SCREEN_HEIGHT/2, 30, WHITE);
+        DrawText(TextFormat("Pontuação: %d", score), SCREEN_WIDTH/2 - 120, SCREEN_HEIGHT/2, 30, WHITE);
 
         bool highScore = false;
         if (highScores[1].count < MAX_SCORES || score > highScores[1].entries[highScores[1].count - 1].score) {
