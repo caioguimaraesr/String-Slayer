@@ -61,11 +61,14 @@ String Slayer é um arcade digital em desenvolvimento, composto por uma coletân
 
 ```bash
 String-Slayer/
-├── src/                # Códigos-fonte dos minigames
+├── .vscode
+├── assets/             # Imagens e sons   
+├── build               # Executáveis
 ├── include/            # Headers do projeto
-├── assets/             # Imagens e sons
+├── src/                # Códigos-fonte dos minigames
 ├── Makefile            # Script de build
-└── main.c              # Ponto de entrada do jogo
+├── README.md           # README.md
+└── scores.dat          # Ponto de entrada do jogo
 ``` 
 
 <h1><strong>🚀 Instalação e Execução</strong></h1>
@@ -80,8 +83,13 @@ String-Slayer/
 ---
 ### 🔧 Passo a passo
 
-1. **Clone o repositório:**
+1. Atualize os pacotes do sistema
+Execute os seguintes comandos para garantir que seu sistema esteja atualizados
+```
+sudo apt update && sudo apt upgrade -y
+```
 
+1. **Clone o repositório:**
 ```bash
 git clone https://github.com/caioguimaraesr/String-Slayer.git
 cd String-Slayer
@@ -101,7 +109,7 @@ sudo apt-get install libx11-dev xserver-xorg-dev xorg-dev
 4. **Instale a raylib**
 
 ```bash
-sudo apt-get install libraylib-dev
+sudo apt install build-essential libgl1-mesa-dev libx11-dev libxcursor-dev libxrandr-dev libxi-dev libxinerama-dev libglu1-mesa-dev cmake
 ```
 Caso a versão do raylib não esteja disponível no gerenciador de pacotes, você pode instalar manualmente via repositório oficial. 
 ```bash
