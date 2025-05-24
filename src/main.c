@@ -237,7 +237,7 @@ int main(void) {
             const char* minijogoNomes[] = {"PONG", "ASTRO DODGE", "AVOID THE WALLS"};
             int y = 120;
             
-            for (int i = 0; i < MAX_MINIJOGOS; i++) {
+            for (int i = 1; i < MAX_MINIJOGOS; i++) {
                 DrawText(minijogoNomes[i], SCREEN_WIDTH/2 - MeasureText(minijogoNomes[i], 30)/2, y, 30, WHITE);
                 
                 // Mostra apenas os top 3 (ou menos se não houver)
