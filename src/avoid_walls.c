@@ -36,7 +36,7 @@ static int nameLetterCount = 0;
 
 void AvoidInit(void) {
     background = LoadTexture("assets/images/Fundo-avoid.jpg");
-    birdTexture = LoadTexture("assets/images/Pombo.png");
+    birdTexture = LoadTexture("assets/images/JetpackBear.png");
     pipeTexture = LoadTexture("assets/images/pipe.png");
     pointSound = LoadSound("assets/music/Correct-Avoid.wav");
     gameOverSound = LoadSound("assets/music/GameOver-Avoid.wav");
@@ -198,7 +198,7 @@ void AvoidDraw(void) {
                     WHITE);
             }
 
-            DrawTextureEx(birdTexture, (Vector2){avoidPlayer.x, avoidPlayer.y}, 0.0f, 0.3f, WHITE);
+            DrawTextureEx(birdTexture, (Vector2){avoidPlayer.x, avoidPlayer.y}, 0.0f, 0.25f, WHITE);
             DrawText(TextFormat("Pontuação: %d", pipePassed), 20, 20, 20, YELLOW);
         }
     } else {

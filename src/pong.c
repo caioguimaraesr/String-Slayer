@@ -180,14 +180,6 @@ void HandleGameEnd() {
         const char *msg = (score1 > score2) ? "Jogador 1 Venceu!" : (score2 > score1) ? "Jogador 2 Venceu!" : "Empate!";
         DrawText(msg, SCREEN_WIDTH/2 - MeasureText(msg, 40)/2, SCREEN_HEIGHT/2 - 20, 40, YELLOW);
         
-        int winningScore = (score1 > score2) ? score1 : score2;
-        
-        // Verifica se é um high score
-        bool highScore = false;
-        if (highScores[0].count < MAX_SCORES || winningScore > highScores[0].entries[highScores[0].count-1].score) {
-            highScore = true;
-        }
-
         DrawText("Pressione ENTER para voltar ao menu", SCREEN_WIDTH/2 - 180, SCREEN_HEIGHT/2 + 30, 20, GRAY);
 
         if (IsKeyPressed(KEY_ENTER)) {
