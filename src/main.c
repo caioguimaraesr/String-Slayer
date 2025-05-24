@@ -55,7 +55,11 @@ int main(void) {
     Sound pongBar = LoadSound("assets/music/Barra.wav");
     Sound pongPoint = LoadSound("assets/music/pontoPong.wav");
     Sound pongRebound = LoadSound("assets/music/Rebound.wav");
-
+    Sound menuSelect = LoadSound("assets/music/Select.wav");
+    Sound menuSelect2 = LoadSound("assets/music/Select2.wav");
+    
+    SetSoundVolume(menuSelect, 0.2f);
+    SetSoundVolume(menuSelect2, 0.2f);
     SetMusicVolume(music,0.04f);
     PlayMusicStream(astroMusic);
     SetMusicVolume(musicPong, 0.045f);
@@ -130,10 +134,18 @@ int main(void) {
             ClearBackground(BLACK);
 
             // Navegação
-            if (IsKeyPressed(KEY_DOWN)) selectedOption = (selectedOption + 1) % mainMenuItemsCount;
-            if (IsKeyPressed(KEY_UP)) selectedOption = (selectedOption - 1 + mainMenuItemsCount) % mainMenuItemsCount;
+            if (IsKeyPressed(KEY_DOWN)) {
+                selectedOption = (selectedOption + 1) % mainMenuItemsCount;
+                PlaySound(menuSelect);
+            }
+
+            if (IsKeyPressed(KEY_UP)) {
+                selectedOption = (selectedOption - 1 + mainMenuItemsCount) % mainMenuItemsCount;
+                PlaySound(menuSelect);
+            }
 
             if (IsKeyPressed(KEY_ENTER)) {
+                PlaySound(menuSelect2); 
                 if (selectedOption == 0) {
                     currentState = GAMES_MENU;
                     selectedOption = 0;
@@ -194,10 +206,17 @@ int main(void) {
                 DrawText(gameMenuItems[i], x, y, fontSize, color);
             }
 
-            if (IsKeyPressed(KEY_DOWN)) selectedOption = (selectedOption + 1) % gameMenuItemsCount;
-            if (IsKeyPressed(KEY_UP)) selectedOption = (selectedOption - 1 + gameMenuItemsCount) % gameMenuItemsCount;
+            if (IsKeyPressed(KEY_DOWN)) {
+                selectedOption = (selectedOption + 1) % gameMenuItemsCount;
+                PlaySound(menuSelect);
+            }
+            if (IsKeyPressed(KEY_UP)) {
+                selectedOption = (selectedOption - 1 + gameMenuItemsCount) % gameMenuItemsCount;
+                PlaySound(menuSelect);
+            }
 
             if (IsKeyPressed(KEY_ENTER)) {
+                PlaySound(menuSelect2);
                 if (selectedOption == 0) {
                     pongStarted = false;
                     pongCountdown = 5.0f;
@@ -313,6 +332,7 @@ int main(void) {
         EndDrawing();
     }
 
+    UnloadSound(menuSelect);
     UnloadTexture(pipeTexture);
     UnloadTexture(background);
     UnloadTexture(asteroidTexture);
