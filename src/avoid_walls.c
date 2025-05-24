@@ -90,7 +90,7 @@ void AvoidUpdate(void) {
 
             if (IsKeyPressed(KEY_ENTER) && nameLetterCount > 0) {
                 nameInputActive = false;
-                atualizarScore(2, pipePassed, playerName); // 2 para AVOID WALLS
+                atualizarScore(1, pipePassed, playerName); // 2 para AVOID WALLS
                 salvarScores("scores.dat");
                 currentState = GAMES_MENU;
             }

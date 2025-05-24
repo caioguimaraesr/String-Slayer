@@ -3,7 +3,7 @@
 #include <string.h>
 #include "score.h"
 
-HighScores highScores[MAX_MINIJOGOS];
+HighScores highScores[MAX_MINIJOGOS + 1];
 
 void carregarScores(const char *filename) {
     FILE *file = fopen(filename, "r");

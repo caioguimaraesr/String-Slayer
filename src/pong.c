@@ -20,7 +20,7 @@ Rectangle player1 = {10, SCREEN_HEIGHT/2 - PADDLE_HEIGHT/2, PADDLE_WIDTH, PADDLE
 Rectangle player2 = {SCREEN_WIDTH - 10 - PADDLE_WIDTH, SCREEN_HEIGHT/2 - PADDLE_HEIGHT/2, PADDLE_WIDTH, PADDLE_HEIGHT};
 int score1 = 0;
 int score2 = 0;
-float gameTime = 60.0f;
+float gameTime = 30.0f;
 bool gameEnded = false;
 bool pongStarted = false;
 float pongCountdown = 3.0f;
@@ -28,19 +28,6 @@ bool pointScored = false;
 float pointDelay = 0.0f;
 bool rebound = false;
 bool barHit = false;
-static char playerName[MAX_NAME_LENGTH] = {0};
-static bool nameInputActive = false;
-static int nameLetterCount = 0;
-
-
-void HandlePointScored() {
-    if (pointScored) {
-        pointDelay -= GetFrameTime();
-        if (pointDelay <= 0.0f) {
-            pointScored = false;
-        }
-    }
-}
 
 void DrawCountdown() {
     if (!pongStarted) {
@@ -103,7 +90,14 @@ void CheckCollisions(Sound pongRebound,Sound pongBar) {
 
 void UpdateGame(Sound pongPoint, Sound pongRebound, Sound pongBar) {
     if (!pongStarted) return;
-
+// Após ponto marcado, aguarda delay e reseta estado
+    if (pointScored) {
+        pointDelay -= GetFrameTime();
+        if (pointDelay <= 0.0f) {
+            pointScored = false;
+    }
+    return; // Enquanto delay não acaba, não atualiza nada
+}
     if (!gameEnded && !pointScored) {
         gameTime -= GetFrameTime();
         if (gameTime <= 0.0f) {
@@ -170,7 +164,7 @@ void DrawGame() {
     }
 
     int seconds = (int)gameTime;
-    DrawText(TextFormat("Tempo: %02d:%02d", seconds / 60, seconds % 60), SCREEN_WIDTH/2 - 70, 10, 30, LIGHTGRAY);
+    DrawText(TextFormat("Tempo: 00:%02d", seconds), SCREEN_WIDTH/2 - 70, 10, 30, LIGHTGRAY);
     DrawText(TextFormat("%d", score1), SCREEN_WIDTH/4, 50, 40, WHITE);
     DrawText(TextFormat("%d", score2), 3*SCREEN_WIDTH/4, 50, 40, WHITE);
 }
@@ -233,8 +227,3 @@ void AppendBallPosition(BallPositionNode **head, Vector2 pos, int *count) {
     }
 }
 
-void ResetPongGame() {
-    nameInputActive = false;
-    memset(playerName, 0, MAX_NAME_LENGTH);
-    nameLetterCount = 0;
-}

@@ -2,7 +2,7 @@
 #define SCORE_H
 
 #define MAX_SCORES 3
-#define MAX_MINIJOGOS 3
+#define MAX_MINIJOGOS 2
 #define MAX_NAME_LENGTH 20
 
 typedef struct {
@@ -15,7 +15,7 @@ typedef struct {
     int count;
 } HighScores;
 
-extern HighScores highScores[MAX_MINIJOGOS];
+extern HighScores highScores[MAX_MINIJOGOS + 1];
 
 void carregarScores(const char *filename);
 void salvarScores(const char *filename);

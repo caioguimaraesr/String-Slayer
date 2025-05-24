@@ -124,7 +124,7 @@ void UpdateAstroDodge(void) {
 
             if (IsKeyPressed(KEY_ENTER) && nameLetterCount > 0) {
                 nameInputActive = false;
-                atualizarScore(1, score, playerName); // 1 para ASTRO DODGE
+                atualizarScore(0, score, playerName); // 1 para ASTRO DODGE
                 salvarScores("scores.dat");
                 returnToMenu = true;
             }

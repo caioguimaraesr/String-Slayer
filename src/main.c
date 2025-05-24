@@ -11,25 +11,9 @@
 #include <commands.h>
 
 
-// == AVOID THE WALLS ==
-Rectangle avoidPlayer; 
-float avoidVelocity = 0;
-float avoidGravity = 600;
-float avoidJumpForce = -300;
-Wall walls[MAX_WALLS]; 
-float wallSpeed = 200;
-int wallSpacing = 300;
-bool avoidGameOver = false;
-float avoidCountdown = 5.0f;
+
 bool avoidInitialized = false;
 
-// == ASTRO DODGE ==
-int asteroidsDestroyed = 0;
-int asteroidsToActivate = 5;
-Bullet bullets[MAX_BULLETS];
-float bulletSpeed = 500.0f;
-
-// == PONG ==
 bool pongMusicStarted = false;
 
 GameState currentState = MENU;
@@ -99,7 +83,6 @@ int main(void) {
             }
         }
         else if (currentState == PONG) {
-            HandlePointScored();
 
             if (pongCountdown <= 0.0f && !pongMusicStarted) {
                 StopMusicStream(music);
@@ -218,23 +201,6 @@ int main(void) {
             if (IsKeyPressed(KEY_ENTER)) {
                 PlaySound(menuSelect2);
                 if (selectedOption == 0) {
-                    pongStarted = false;
-                    pongCountdown = 5.0f;
-                    for (int r = 0; r < ROWS; r++)
-                        for (int c = 0; c < COLS; c++)
-                            grid[r][c] = 0;
-
-                    player1.y = SCREEN_HEIGHT/2 - PADDLE_HEIGHT/2;
-                    player2.y = SCREEN_HEIGHT/2 - PADDLE_HEIGHT/2;
-                    ballPosition = (Vector2){SCREEN_WIDTH/2.0f, SCREEN_HEIGHT/2.0f};
-                    ballSpeed = (Vector2){BALL_SPEED, BALL_SPEED};
-                    score1 = score2 = 0;
-                    gameTime = 120.0f;
-                    gameEnded = false;
-                    FreeBallHistory(history);
-                    history = NULL;
-                    historyCount = 0;
-
                     currentState = PONG;
                 } else if (selectedOption == 1) {
                     currentState = ASTRO_DODGE;
@@ -253,10 +219,10 @@ int main(void) {
             DrawText("TOP 3 SCORES", SCREEN_WIDTH/2 - MeasureText("TOP 3 SCORES", 40)/2, 50, 40, YELLOW);
             
             // Scores para cada minijogo
-            const char* minijogoNomes[] = {"PONG", "ASTRO DODGE", "AVOID THE WALLS"};
+            const char* minijogoNomes[] = {"ASTRO DODGE", "AVOID THE WALLS"};
             int y = 120;
             
-            for (int i = 1; i < MAX_MINIJOGOS; i++) {
+            for (int i = 0; i < MAX_MINIJOGOS; i++) {
                 DrawText(minijogoNomes[i], SCREEN_WIDTH/2 - MeasureText(minijogoNomes[i], 30)/2, y, 30, WHITE);
                 
                 // Mostra apenas os top 3 (ou menos se não houver)
@@ -278,7 +244,6 @@ int main(void) {
 
         // Inicio do Jogo Pong
         else if (currentState == PONG) {
-            HandlePointScored();
             DrawCountdown();
             UpdateGame(pongPoint,pongRebound,pongBar);
             DrawGame();

@@ -43,7 +43,7 @@ extern bool rebound;
 extern bool barHit;
 
 
-void HandlePointScored(void);
+
 void DrawCountdown(void);
 void UpdateGame(Sound pongPoint,Sound pongRebound,Sound pongBar);
 void DrawGame(void);
