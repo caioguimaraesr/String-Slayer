@@ -89,26 +89,20 @@ Execute os seguintes comandos para garantir que seu sistema esteja atualizados
 sudo apt update && sudo apt upgrade -y
 ```
 
-1. **Clone o repositório:**
+1. **Instale depêndencias básicas de compilação**
 ```bash
-git clone https://github.com/caioguimaraesr/String-Slayer.git
-cd String-Slayer
-
+sudo apt install -y make cmake build-essential
 ````
-2. **Atualize o pacote do sistema**
 
+2. **Instale as bibliotecas gráficas necessárias**
 ```bash
-sudo apt-get install make cmake build-essential
+sudo apt install -y libgl1-mesa-dev libx11-dev libxcursor-dev libxrandr-dev libxi-dev libxinerama-dev libglu1-mesa-dev xorg-dev xserver-xorg-dev
 ```
 
 3. **Instale a raylib**
-
+💡 Se preferir usar a versão mais recente da raylib, siga o método manual abaixo. 
 ```bash
-sudo apt install build-essential libgl1-mesa-dev libx11-dev libxcursor-dev libxrandr-dev libxi-dev libxinerama-dev libglu1-mesa-dev cmake
-```
-Caso a versão do raylib não esteja disponível no gerenciador de pacotes, você pode instalar manualmente via repositório oficial. 
-```bash
-cd ~ 
+cd ~
 git clone https://github.com/raysan5/raylib.git
 cd raylib
 mkdir build && cd build
@@ -116,12 +110,13 @@ cmake -DPLATFORM=Desktop ..
 make
 sudo make install
 ```
-OBS: Caso já possua a raylib instalada, pule esse passo.
+✅ Caso já tenha a raylib instalada, você pode pular este passo
 
-4. **Instale dependências gráficas**
+4. **Clone o Repositório**
    
 ```bash
-sudo apt-get install libx11-dev xserver-xorg-dev xorg-dev
+git clone https://github.com/caioguimaraesr/String-Slayer.git
+cd String-Slayer
 ```
 
 **Execução do Jogo**
