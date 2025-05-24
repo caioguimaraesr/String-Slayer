@@ -100,13 +100,8 @@ cd String-Slayer
 ```bash
 sudo apt-get install make cmake build-essential
 ```
-3. **Instale dependências gráficas**
-   
-```bash
-sudo apt-get install libx11-dev xserver-xorg-dev xorg-dev
-```
 
-4. **Instale a raylib**
+3. **Instale a raylib**
 
 ```bash
 sudo apt install build-essential libgl1-mesa-dev libx11-dev libxcursor-dev libxrandr-dev libxi-dev libxinerama-dev libglu1-mesa-dev cmake
@@ -122,6 +117,12 @@ make
 sudo make install
 ```
 OBS: Caso já possua a raylib instalada, pule esse passo.
+
+4. **Instale dependências gráficas**
+   
+```bash
+sudo apt-get install libx11-dev xserver-xorg-dev xorg-dev
+```
 
 **Execução do Jogo**
 Para compilar e rodar o jogo
