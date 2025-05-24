@@ -18,32 +18,11 @@ String Slayer é um arcade digital em desenvolvimento, composto por uma coletân
 
 ---
 
-<h1><strong>👥 Equipe</strong></h1>
+<h1><strong>👥 Vídeo Demonstrativo</strong></h1>
 
-<p align="center">
-<table>
-  <tr>
-    <td align="center">
-      <a href="https://github.com/caioguimaraesr">
-        <img src="https://avatars.githubusercontent.com/caioguimaraesr" width="100" style="border-radius: 50%; margin: 10px;" />
-        <br><strong>🎮 Caio G. Rocha</strong>
-      </a>
-    </td>
-    <td align="center">
-      <a href="https://github.com/rodrigo603">
-        <img src="https://avatars.githubusercontent.com/rodrigo603" width="100" style="border-radius: 50%; margin: 10px;" />
-        <br><strong>🎮 Rodrigo Dantas</strong>
-      </a>
-    </td>
-    <td align="center">
-      <a href="https://github.com/leoVeraas">
-        <img src="https://avatars.githubusercontent.com/leoVeraas" width="100" style="border-radius: 50%; margin: 10px;" />
-        <br><strong>🎮 Leandro Veras</strong>
-      </a>
-    </td>
-  </tr>
-</table>
-</p>
+<a href="https://youtu.be/JYtRvtClJTQ?si=ELyZO96sPUvDlrxI">
+    <img src="assets\images\String Slayer - Background.png" alt="Stringslayer">
+</a>
 
 ---
 
@@ -141,9 +120,29 @@ make clean
 🐤 Avoid the Walls — estilo Flappy Bird, teste seus reflexos!
 </p>
 
-<h2><strong> Demonstração do jogo </strong></h2> 
 
-[![**Stringslayer**](assets\images\StringSlayer.jpg)](https://youtu.be/JYtRvtClJTQ?si=ELyZO96sPUvDlrxI)
 <h1> 🎉 Obrigado por instalar o String Slayer! </h1>
 Esperamos que você se divirta jogando tanto quanto nós nos divertimos criando! ❤️ 
 Bom jogo!
+
+<br>
+<h1><strong>👥 Equipe</strong></h1>
+
+<p align="center">
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/caioguimaraesr">
+        <img src="https://avatars.githubusercontent.com/caioguimaraesr" width="100" style="border-radius: 50%; margin: 10px;" />
+        <br><strong>🎮 Caio G. Rocha</strong>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/rodrigo603">
+        <img src="https://avatars.githubusercontent.com/rodrigo603" width="100" style="border-radius: 50%; margin: 10px;" />
+        <br><strong>🎮 Rodrigo Dantas</strong>
+      </a>
+    </td>
+  </tr>
+</table>
+</p>
