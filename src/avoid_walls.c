@@ -61,7 +61,7 @@ void AvoidInit(void) {
 void AvoidUpdate(void) {
     if (avoidGameOver) {
         bool highScore = false;
-        if (highScores[2].count < MAX_SCORES || pipePassed > highScores[2].entries[highScores[2].count-1].score) {
+        if (highScores[1].count < MAX_SCORES || pipePassed > highScores[1].entries[highScores[1].count-1].score) {
             highScore = true;
         }
 

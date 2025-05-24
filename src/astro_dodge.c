@@ -94,7 +94,7 @@ void UpdateAstroDodge(void) {
     if (gameOver) {
         // Verifica se o score é alto o suficiente para entrar no ranking
         bool highScore = false;
-        if (highScores[1].count < MAX_SCORES || score > highScores[1].entries[highScores[1].count-1].score) {
+        if (highScores[0].count < MAX_SCORES || score > highScores[0].entries[highScores[0].count-1].score) {
             highScore = true;
         }
 
@@ -130,7 +130,7 @@ void UpdateAstroDodge(void) {
             }
         } else {
             if (IsKeyPressed(KEY_ENTER)) {
-                atualizarScore(1, score, "Anonimo"); // Se não for high score, usa "Anonimo"
+                atualizarScore(0, score, "Anonimo"); // Se não for high score, usa "Anonimo"
                 salvarScores("scores.dat");
                 returnToMenu = true;
             }
